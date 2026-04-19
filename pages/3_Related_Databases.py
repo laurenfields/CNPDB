@@ -375,7 +375,7 @@ for row_index in range(num_rows):
 
 st.markdown("""
 <div style="text-align: center; font-size:14px; color:#2a2541;">
-  <em>Last update: Jul 2025</em>
+  <em>Last update: Apr 2026</em>
 </div>
 """, unsafe_allow_html=True)
 

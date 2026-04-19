@@ -75,4 +75,4 @@ For other tools developed by the Li Lab, please visit [**www.lilabs.org/resource
 ## COPYRIGHTS
 Copyright 2025 Department of Pharmaceutical Sciences, University of Wisconsin-Madison, **All Rights Reserved**
 
-*Last update: Jul 2025*
+*Last update: Apr 2026*

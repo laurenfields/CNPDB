@@ -431,7 +431,7 @@ div.stCheckbox {
 """, unsafe_allow_html=True)
 
 # --- Load Data ---
-df = pd.read_excel("Assets/20250801_cNPDB.xlsx")
+df = pd.read_excel("Assets/20260418_cNPDB.xlsx")
 
 # --- FASTA DOWNLOAD: Full Database ---
 full_fasta = "\n".join(
@@ -893,6 +893,6 @@ st.markdown(
 # Footer
 st.markdown("""
 <div style="text-align: center; font-size:14px; color:#2a2541;">
-  <em>Last update: Jul 2025</em>
+  <em>Last update: Apr 2026</em>
 </div>
 """, unsafe_allow_html=True)

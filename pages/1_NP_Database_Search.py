@@ -6,7 +6,6 @@ from PIL import Image
 import base64
 import re
 import numpy as np
-import py3Dmol
 import streamlit.components.v1 as components
 import io
 import zipfile
@@ -68,10 +67,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+@st.cache_data
+def read_structure_file(file_path: str) -> str:
+    # Read a structure file from disk and cache the contents.
+    with open(file_path, 'r') as f:
+        return f.read()
+        
 def show_structure_cif(cif_path, width=350, height=250):
-    # load the CIF text
-    with open(cif_path, 'r') as f:
-        cif_data = f.read()
+    import py3Dmol
+    # Use cached file read instead of raw open()
+    cif_data = read_structure_file(cif_path)
     # set up the viewer
     view = py3Dmol.view(width=width, height=height)
     view.addModel(cif_data, 'cif')
@@ -92,9 +97,9 @@ def show_structure_cif(cif_path, width=350, height=250):
 
 
 def show_structure_pdb(pdb_path, width=350, height=250):
-    # Load the PDB file
-    with open(pdb_path, 'r') as f:
-        pdb_data = f.read()
+    import py3Dmol
+    # Use cached file read instead of raw open()
+    pdb_data = read_structure_file(pdb_path)
     
     # Set up the 3Dmol viewer
     view = py3Dmol.view(width=width, height=height)
@@ -431,14 +436,22 @@ div.stCheckbox {
 """, unsafe_allow_html=True)
 
 # --- Load Data ---
-df = pd.read_excel("Assets/20260418_cNPDB.xlsx")
+@st.cache_data
+def load_database():
+    return pd.read_excel("Assets/20260418_cNPDB.xlsx")
+
+df = load_database()
 
 # --- FASTA DOWNLOAD: Full Database ---
-full_fasta = "\n".join(
-    f">{str(row['ID']).lstrip('>')}\n{str(row['Sequence'])}"
-    for _, row in df.iterrows()
-    if pd.notna(row['ID']) and pd.notna(row['Sequence'])
-)
+@st.cache_data
+def build_full_fasta(_df):
+    return "\n".join(
+        f">{str(row['ID']).lstrip('>')}\n{str(row['Sequence'])}"
+        for _, row in _df.iterrows()
+        if pd.notna(row['ID']) and pd.notna(row['Sequence'])
+    )
+
+full_fasta = build_full_fasta(df)
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
@@ -472,14 +485,20 @@ numeric_cols = ['Monoisotopic Mass', 'Length', 'GRAVY', '% Hydrophobic Residue',
 for col in numeric_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
-# Helper function to extract unique clean items from multi-value cells
-def extract_unique_values(series):
-    return sorted(set(
-        item.strip()
-        for entry in series.dropna()
-        for item in re.split(r'[;,]', str(entry))
-        if item.strip()
-    ))
+def get_filter_options(_df):
+    """Pre-compute all filter dropdown options once."""
+    return {
+        "family": sorted(_df['Family'].dropna().unique()),
+        "organisms": extract_unique_values(_df['OS']),
+        "tissue": extract_unique_values(_df['Tissue']),
+        "ptm": extract_unique_values(_df['PTM']),
+        "existence": extract_unique_values(_df['Existence']),
+        "topic": extract_unique_values(_df['Topic']),
+        "instrument": extract_unique_values(_df['Instrument']),
+        "technique": extract_unique_values(_df['Technique']),
+    }
+
+filter_opts = get_filter_options(df)
 
 # Create two columns with a 20px gap using Streamlit's built-in layout
 col_filter, col_main = st.columns([1, 3], gap= "large")
@@ -540,41 +559,33 @@ with col_main:
 
     # Family
     st.markdown('<div class="section-title" style="margin-top: -10px; margin-bottom: 8px;">Family</div>', unsafe_allow_html=True)
-    family_opts = sorted(df['Family'].dropna().unique())
-    family_selected = st.multiselect(label=" ", options=family_opts, key="fam", label_visibility="collapsed")
+    family_selected = st.multiselect(label=" ", options=filter_opts["family"], key="fam", label_visibility="collapsed")
 
     # Organisms
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Organisms</div>', unsafe_allow_html=True)
-    org_opts = extract_unique_values(df['OS'])
-    organisms_selected = st.multiselect(label=" ", options=org_opts, key="org", label_visibility="collapsed")
+    organisms_selected = st.multiselect(label=" ", options=filter_opts["organisms"], key="org", label_visibility="collapsed")
 
     # Tissue
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Tissue</div>', unsafe_allow_html=True)
-    tissue_opts = extract_unique_values(df['Tissue'])
-    tissue_selected = st.multiselect(label=" ", options=tissue_opts, key="tissue", label_visibility="collapsed")
+    tissue_selected = st.multiselect(label=" ", options=filter_opts["tissue"], key="tissue", label_visibility="collapsed")
 
     # PTM
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Post-translational modifications (PTM)</div>', unsafe_allow_html=True)
-    ptm_opts = extract_unique_values(df['PTM'])
-    ptm_selected = st.multiselect(label=" ", options=ptm_opts, key="ptm", label_visibility="collapsed")
+    ptm_selected = st.multiselect(label=" ", options=filter_opts["ptm"], key="ptm", label_visibility="collapsed")
 
     # Existence
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Existence</div>', unsafe_allow_html=True)
-    exist_opts      = extract_unique_values(df['Existence'])
-    existence_selected = st.multiselect(label=" ", options=exist_opts, key="exist", label_visibility="collapsed")
+    existence_selected = st.multiselect(label=" ", options=filter_opts["existence"], key="exist", label_visibility="collapsed")
 
      # --- NEW: Filters for Sheet 2 data ---
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Physiological Studies or Applications</div>', unsafe_allow_html=True)
-    topic_opts = extract_unique_values(df['Topic'])
-    topic_selected = st.multiselect(label=" ", options=topic_opts, key="topic", label_visibility="collapsed")
+    topic_selected = st.multiselect(label=" ", options=filter_opts["topic"], key="topic", label_visibility="collapsed")
 
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Instrument</div>', unsafe_allow_html=True)
-    instrument_opts = extract_unique_values(df['Instrument'])
-    instrument_selected = st.multiselect(label=" ", options=instrument_opts, key="instrument", label_visibility="collapsed")
+    instrument_selected = st.multiselect(label=" ", options=filter_opts["instrument"], key="instrument", label_visibility="collapsed")
     
     st.markdown('<div class="section-title" style="margin-top: 15px; margin-bottom: 8px">Technique</div>', unsafe_allow_html=True)
-    technique_opts = extract_unique_values(df['Technique'])
-    technique_selected = st.multiselect(label=" ", options=technique_opts, key="technique", label_visibility="collapsed")
+    technique_selected = st.multiselect(label=" ", options=filter_opts["technique"], key="technique", label_visibility="collapsed")
 
     st.markdown('</div>', unsafe_allow_html=True)
 

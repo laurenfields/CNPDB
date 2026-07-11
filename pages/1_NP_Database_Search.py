@@ -487,6 +487,14 @@ for col in numeric_cols:
 
 def get_filter_options(_df):
     """Pre-compute all filter dropdown options once."""
+    def extract_unique_values(series):
+        return sorted(set(
+            item.strip()
+            for entry in series.dropna()
+            for item in re.split(r'[;,]', str(entry))
+            if item.strip()
+        ))
+ 
     return {
         "family": sorted(_df['Family'].dropna().unique()),
         "organisms": extract_unique_values(_df['OS']),

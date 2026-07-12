@@ -3,7 +3,9 @@
 </p>
 
 ## cNPDB: <ins>c</ins>rustacean <ins>N</ins>euro<ins>p</ins>eptide <ins>D</ins>ata<ins>b</ins>ase
+
 Access the website at https://cnpdatabase.streamlit.app/
+
 Neuropeptides are cell-to-cell signaling molecules involved in numerous physiological processes, including metabolism, development, reproduction, and behavior. They are highly conserved both structurally and functionally across the animal kingdom, making the neuropeptide study in simple invertebrate models advantageous for gaining insights into basic neurobiology principles, drug discoveries, and functional investigations that are translatable to mammalian systems. Crustaceans are profound model organisms for neuropeptide studies and have long been used to investigate the robustness of rhythmic central pattern generator, feeding behavior, and neural responses to external stimuli.
 
 Despite their significance, crustacean neuropeptides remain underrepresented in existing neuropeptide databases. To address this gap, we introduce the Crustacean Neuropeptide Database (cNPDB) – A comprehensive resource for neuropeptide research in crustacean species. cNPDB systematically curates experimentally confirmed and predicted neuropeptides from various crustacean species using genome-derived in silico mining, peer-reviewed literature, mass spectrometry-based peptidomics, and public protein databases. This database provides detailed annotations and sequences to support a range of endeavors, including comparative neurobiology, functional studies, education, and computational peptide discovery.

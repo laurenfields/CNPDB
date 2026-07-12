@@ -1,97 +1,56 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import uuid
-import pandas as pd
 import os
 import csv
 import streamlit as st
-import streamlit.components.v1 as components
 
 SESSION_LOG_FILE = "session_log.csv"
-COOKIE_EXPIRY_MINUTES = 30  # Only count again after 30 minutes
 
-# Custom JS Cookie Reader/Setter
-def set_and_get_cookies_js(cookie_name, cookie_value=None, days_expire=30):
-    js_code = f"""
-    <script>
-        function setCookie(name, value, days) {{
-            const d = new Date();
-            d.setTime(d.getTime() + (days*24*60*60*1000));
-            let expires = "expires=" + d.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
-        }}
-
-        function getCookie(name) {{
-            let decodedCookie = decodeURIComponent(document.cookie);
-            let ca = decodedCookie.split(';');
-            for(let i = 0; i < ca.length; i++) {{
-                let c = ca[i];
-                while (c.charAt(0) == ' ') {{
-                    c = c.substring(1);
-                }}
-                if (c.indexOf(name + "=") == 0) {{
-                    return c.substring((name + "=").length, c.length);
-                }}
-            }}
-            return "";
-        }}
-
-        const cookieName = "{cookie_name}";
-        const cookieVal = getCookie(cookieName);
-
-        if (!cookieVal && "{cookie_value}" !== "") {{
-            setCookie(cookieName, "{cookie_value}", {days_expire});
-            document.body.innerText = "{cookie_value}";
-        }} else {{
-            document.body.innerText = cookieVal;
-        }}
-    </script>
-    """
-    result = components.html(js_code, height=0)
-    return result
 
 def track_session():
+    """Log a session visit ONCE, then do nothing on subsequent reruns."""
+
+    # If we already tracked this session, return immediately.
+    # This is the key optimization — skip ALL work on reruns.
+    if st.session_state.get("_session_tracked", False):
+        return st.session_state.get("_session_count", 0)
+
+    # First run for this browser session — generate ID and log it
+    session_id = str(uuid.uuid4())
     now = datetime.now()
 
-    # Use JS to set/get visitor_id and last_visit cookies
-    session_id = str(uuid.uuid4())
-    visitor_id = set_and_get_cookies_js("visitor_id", session_id)
-    last_visit = set_and_get_cookies_js("last_visit", now.isoformat())
+    # Log to CSV
+    _log_to_csv(session_id, now)
 
-    # Store them in session_state for access
-    if "visitor_id" not in st.session_state:
-        st.session_state.visitor_id = visitor_id
-    if "last_visit" not in st.session_state:
-        st.session_state.last_visit = last_visit
+    # Mark as tracked so we never do this again in this session
+    st.session_state["_session_tracked"] = True
+    st.session_state["_session_count"] = _get_logged_session_count()
 
-    # Try parse last visit
-    should_log = False
+    return st.session_state["_session_count"]
+
+
+def _log_to_csv(session_id, timestamp):
+    """Append a session entry to the CSV log."""
+    file_exists = os.path.exists(SESSION_LOG_FILE)
     try:
-        parsed_last_visit = datetime.fromisoformat(last_visit)
-        if now - parsed_last_visit > timedelta(minutes=COOKIE_EXPIRY_MINUTES):
-            should_log = True
-    except Exception:
-        should_log = True
-
-    if should_log:
-        log_to_csv(visitor_id or session_id, now)
-        # Update cookie
-        _ = set_and_get_cookies_js("last_visit", now.isoformat())
-
-    return get_logged_session_count()
-
-def log_to_csv(session_id, timestamp):
-    if not os.path.exists(SESSION_LOG_FILE):
-        with open(SESSION_LOG_FILE, "w", newline="") as f:
+        with open(SESSION_LOG_FILE, "a", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["SessionID", "Timestamp"])
+            if not file_exists:
+                writer.writerow(["SessionID", "Timestamp"])
+            writer.writerow([session_id, timestamp.strftime("%Y-%m-%d %H:%M:%S")])
+    except Exception:
+        pass  # Don't let logging failures break the app
 
-    with open(SESSION_LOG_FILE, "a", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow([session_id, timestamp.strftime("%Y-%m-%d %H:%M:%S")])
 
-def get_logged_session_count():
+def _get_logged_session_count():
+    """Count total sessions from the CSV log."""
     try:
-        df = pd.read_csv(SESSION_LOG_FILE)
-        return len(df)
+        # Use csv.reader instead of pd.read_csv — much faster for
+        # just counting rows, and avoids importing pandas here.
+        with open(SESSION_LOG_FILE, "r") as f:
+            reader = csv.reader(f)
+            next(reader, None)  # skip header
+            return sum(1 for _ in reader)
     except FileNotFoundError:
         return 0
+

@@ -100,7 +100,7 @@ papers = [
         "img": "Assets/Publication_TOC/GenomeCrab.jpeg",
         "title": "Neuropeptide Diversity Encoded in Newly Sequenced Crustacean Genomes Reveals Signaling Roles during Feeding",
         "summary": (
-            "we integrate genomic sequence information with neuropeptidomics to define the neuropeptidomes of two widely used crustacean model organisms, "
+            "We integrate genomic sequence information with neuropeptidomics to define the neuropeptidomes of two widely used crustacean model organisms, "
             " Callinectes sapidus and Cancer borealis"
         ),
         "link": "https://doi.org/10.1021/acschemneuro.6c00123"
@@ -119,7 +119,7 @@ papers = [
         "img": "Assets/Publication_TOC/HemolymphOptimization.jpeg",
         "title": "Mass Spectrometry-Based Peptidomics for the Discovery and Profiling of Endogenous Peptides in Crustacean Hemolymph",
         "summary": (
-            "we systematically evaluated five extraction workflows to optimize endogenous peptide recovery from the hemolymph of the "
+            "We systematically evaluated five extraction workflows to optimize endogenous peptide recovery from the hemolymph of the "
             "American lobster (Homarus americanus) and the blue crab (Callinectes sapidus)"
         ),
         "link": "https://doi.org/10.1021/acsomega.6c00679"

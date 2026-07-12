@@ -88,6 +88,24 @@ papers = [
         "link": "https://pubs.acs.org/doi/full/10.1021/acschemneuro.5c00053"
     },
     {
+        "img": "Assets/Publication_TOC/osteoarthritis.jpeg",
+        "title": "Global spinal cord peptidome profiling in response to osteoarthritis in rats",
+        "summary": (
+            "MS was employed to characterize the spinal cord neuropeptidome in a validated rat model of osteoarthritis pain, "
+            "revealing dynamic changes in endogenous spinal peptides during OA progression."
+        ),
+        "link": "https://doi.org/10.1039/D5MO00152H"
+    },
+    {
+        "img": "Assets/Publication_TOC/GenomeCrab.jpeg",
+        "title": "Neuropeptide Diversity Encoded in Newly Sequenced Crustacean Genomes Reveals Signaling Roles during Feeding",
+        "summary": (
+            "we integrate genomic sequence information with neuropeptidomics to define the neuropeptidomes of two widely used crustacean model organisms, "
+            " Callinectes sapidus and Cancer borealis"
+        ),
+        "link": "https://doi.org/10.1021/acschemneuro.6c00123"
+    },
+    {
         "img": "Assets/Publication_TOC/Gaoyuan AmericanLobster TOC.jpeg",
         "title": "Neuropeptidomics of the American Lobster",
         "summary": (
@@ -96,6 +114,24 @@ papers = [
             "We identified 24 neuropeptide precursors and 101 unique mature neuropeptides."
         ),
         "link": "https://pubs.acs.org/doi/10.1021/jasms.4c00192"
+    },
+    {
+        "img": "Assets/Publication_TOC/HemolymphOptimization.jpeg",
+        "title": "Mass Spectrometry-Based Peptidomics for the Discovery and Profiling of Endogenous Peptides in Crustacean Hemolymph",
+        "summary": (
+            "we systematically evaluated five extraction workflows to optimize endogenous peptide recovery from the hemolymph of the "
+            "American lobster (Homarus americanus) and the blue crab (Callinectes sapidus)"
+        ),
+        "link": "https://doi.org/10.1021/acsomega.6c00679"
+    },
+    {
+        "img": "Assets/Publication_TOC/OpenSearchCrab.jpeg",
+        "title": "Global Profiling of Post-Translationally Modified Crustacean Neuropeptidome Trends Affiliated with Feeding Activity",
+        "summary": (
+            "Using innovative approaches capable of addressing the vast combinations of possible modifications, such as the PEAKS PTM search algorithm, "
+            "we globally profiled the neuropeptidome ofCancer borealis(Jonah crab) to investigate the role of PTMs in feeding- and appetite-related processes over time."
+        ),
+        "link": "https://doi.org/10.1021/jasms.6c00017"
     },
      {
         "img": "Assets/Publication_TOC/UpdatedGuideNeuropeptideProcess.jpeg",
@@ -365,6 +401,6 @@ for row_index in range(num_rows):
 # ─── Footer ───────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="text-align: center; font-size: 14px; color: #2a2541;">
-  <em>Last update: Apr 2026</em>
+  <em>Last update: Jul 2026</em>
 </div>
 """, unsafe_allow_html=True)

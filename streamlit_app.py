@@ -13,19 +13,19 @@ st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 from sidebar import render_sidebar
 render_sidebar()
 
-# @st.cache_data
-# def load_banner_image():
-#    """Load and cache the banner image."""
-#    return Image.open("Assets/Img/cNPDB_Banner.png")
+@st.cache_data
+def load_banner_image():
+   """Load and cache the banner image."""
+   return Image.open("Assets/Img/cNPDB_Banner.png")
 
-# @st.cache_data
-# def load_home_image_base64():
-#     """Load home page image and return as base64 string."""
-#     image_path = os.path.join("Assets", "Img", "Home page.png")
-#     if os.path.exists(image_path):
-#         with open(image_path, "rb") as img_file:
-#             return base64.b64encode(img_file.read()).decode()
-#     return None
+@st.cache_data
+def load_home_image_base64():
+    """Load home page image and return as base64 string."""
+    image_path = os.path.join("Assets", "Img", "Home page.png")
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return None
 
 # Main content area
 st.markdown("""<div style="padding:0;margin:0;">""", unsafe_allow_html=True)
@@ -37,7 +37,6 @@ except:
     st.error("Banner image not found")
 
 st.markdown("""
-## WELCOME TO cNPDB: Crustacean Neuropeptide Database
 
 Neuropeptides are cell-to-cell signaling molecules involved in numerous physiological processes, including metabolism, development, reproduction, and behavior. They are highly conserved both structurally and functionally across the animal kingdom, making the neuropeptide study in simple invertebrate models advantageous for gaining insights into basic neurobiology principles, drug discoveries, and functional investigations that are translatable to mammalian systems.  Crustaceans are profound model organisms for neuropeptide studies and have long been used to investigate the robustness of rhythmic central pattern generator, feeding behavior, and neural responses to external stimuli.
 

@@ -7,8 +7,8 @@ from io import StringIO
 from Bio.Align import substitution_matrices
 import re
 
-from utils.session_tracker import track_session
-track_session()
+# from utils.session_tracker import track_session
+# track_session()
 
 
 st.set_page_config(

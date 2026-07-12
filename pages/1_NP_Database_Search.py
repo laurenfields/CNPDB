@@ -888,14 +888,15 @@ if len(df_filtered) > 0:
                         key="download_zip"
                     )
 
-    # View Details display (stays at the bottom, below the cards)
-    if st.session_state.view_details:
-        if selected_rows.empty:
+        # Warning appears inside button_container (above cards)
+        if st.session_state.view_details and selected_rows.empty:
             st.warning("⚠️ Please select at least one peptide to view details.")
-        else:
-            for _, row in selected_rows.iterrows():
-                display_peptide_details(row)
-                st.markdown("<hr style='border: 1px solid #6a51a3; margin: 40px 0;'>", unsafe_allow_html=True)
+
+    # View Details expanded content (stays at the bottom, below the cards)
+    if st.session_state.view_details and not selected_rows.empty:
+        for _, row in selected_rows.iterrows():
+            display_peptide_details(row)
+            st.markdown("<hr style='border: 1px solid #6a51a3; margin: 40px 0;'>", unsafe_allow_html=True)
 
 else:
     st.warning("❌ No peptides match your search criteria. Please refine your parameters.")
@@ -912,3 +913,4 @@ st.markdown("""
   <em>Last update: Apr 2026</em>
 </div>
 """, unsafe_allow_html=True)
+

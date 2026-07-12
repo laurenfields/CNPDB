@@ -438,7 +438,7 @@ div.stCheckbox {
 # --- Load Data ---
 @st.cache_data
 def load_database():
-    return pd.read_excel("Assets/20260418_cNPDB.xlsx")
+    return pd.read_parquet("Assets/20260418_cNPDB.parquet")
 
 df = load_database()
 

@@ -32,10 +32,6 @@ st.markdown(f"""
             <h2 style="color:#4a3666; margin-left: 15px;">76</h2>
             <p style="margin: 0; font-weight: bold; color:#4a3666;">Neuropeptide Families</p>
         </div>
-        <div style="flex: 1; background-color: #eeeeee; text-align: center; padding: 20px 0;">
-            <h2 style="color:#4a3666; margin-left: 15px;">{session_count}</h2>
-            <p style="margin: 0; font-weight: bold; color:#4a3666;">Page visits</p>
-        </div>
     </div>
 """, unsafe_allow_html=True)
 st.markdown("---")

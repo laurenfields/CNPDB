@@ -4,8 +4,8 @@ import os
 import base64
 from io import BytesIO
 import streamlit.components.v1 as components
-from utils.session_tracker import track_session
-track_session()
+# from utils.session_tracker import track_session
+# track_session()
 
 # Set page config
 st.set_page_config(layout="wide", initial_sidebar_state="expanded")
@@ -13,11 +13,25 @@ st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 from sidebar import render_sidebar
 render_sidebar()
 
+@st.cache_data
+def load_banner_image():
+    """Load and cache the banner image."""
+    return Image.open("Assets/Img/cNPDB_Banner.png")
+
+@st.cache_data
+def load_home_image_base64():
+    """Load home page image and return as base64 string."""
+    image_path = os.path.join("Assets", "Img", "Home page.png")
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return base64.b64encode(img_file.read()).decode()
+    return None
+
 # Main content area
 st.markdown("""<div style="padding:0;margin:0;">""", unsafe_allow_html=True)
 
 try:
-    banner = Image.open("Assets/Img/cNPDB_Banner.png")
+    banner = load_banner_image()
     st.image(banner, use_container_width=True)
 except:
     st.error("Banner image not found")
@@ -31,20 +45,16 @@ Despite their significance, crustacean neuropeptides remain underrepresented in 
 
 """)
 
-# Load Home page image and convert to base64
-image_path = os.path.join("Assets", "Img", "Home page.png")
-if os.path.exists(image_path):
-    with open(image_path, "rb") as img_file:
-        img_bytes = img_file.read()
-        img_b64 = base64.b64encode(img_bytes).decode()
-
+# Display cached home page image
+img_b64 = load_home_image_base64()
+if img_b64:
     st.markdown(f"""
         <div style="margin: 0 auto; text-align: center;">
             <img src="data:image/png;base64,{img_b64}" style="width: auto; max-height: 500px;" />
         </div>
     """, unsafe_allow_html=True)
 else:
-    st.error(f"Image not found at {image_path}")
+    st.error("Home page image not found")
     
 st.markdown("""
 ### TOOLS & FEATURES

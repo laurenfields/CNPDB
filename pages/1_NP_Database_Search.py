@@ -734,28 +734,31 @@ st.markdown(
 if len(df_filtered) > 0:
     # Reserve a spot for buttons at the top
     button_container = st.container()
-
+ 
     # Hit count
     st.markdown(f"<div style='text-align: right; margin-bottom: 5px;'>Hit: {len(df_filtered)} peptides</div>", unsafe_allow_html=True)
     
     # Check/Uncheck All
     check_all = st.checkbox("Check/Uncheck All")
-
+ 
+    # Reserve a spot for View Details panel (between checkbox and cards)
+    details_container = st.container()
+ 
     # 4) Peptide cards in three columns
     selected_indices = []
     cols = st.columns(3)
-
+ 
     for i, (idx, row) in enumerate(df_filtered.iterrows()):
         with cols[i % 3]:
             checked = st.checkbox("", key=f"check_{idx}", value=check_all)
             if checked:
                 selected_indices.append(idx)
-
+ 
             # Clean organism field to only show unique values
             org_raw = str(row['OS']) if pd.notna(row['OS']) else ""
             org_list = [item.strip() for item in org_raw.split(';') if item.strip()]
             org_unique = "; ".join(sorted(set(org_list), key=org_list.index))
-
+ 
             st.markdown(f"""
                 <div style='max-width:100%; overflow-x:auto; padding-right:4px;'>
                     <div style='border:1px solid #6A0DAD; padding:10px; margin-bottom:20px; border-radius:10px;'>
@@ -780,23 +783,23 @@ if len(df_filtered) > 0:
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-
+ 
     # Now fill the button container that we reserved at the top
     selected_rows = df_filtered.loc[selected_indices] if selected_indices else pd.DataFrame()
-
+ 
     with button_container:
         col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-
+ 
         # View Details
         with col1:
             left_space, right_button = st.columns([1,4])
             with right_button:
                 if "view_details" not in st.session_state:
                     st.session_state.view_details = False
-
+ 
                 if st.button("View Details", type="primary"):
                     st.session_state.view_details = True
-
+ 
         # Download Excel
         with col2:
             with st.container():
@@ -815,7 +818,7 @@ if len(df_filtered) > 0:
                         type="primary",
                         key="download_excel"
                     )
-
+ 
         # Download FASTA File
         with col3:
             with st.container():
@@ -834,7 +837,7 @@ if len(df_filtered) > 0:
                         type="primary",
                         key="download_fasta"
                     )
-
+ 
         # Download ZIP (CIF + MSI)
         with col4:
             with st.container():
@@ -845,28 +848,28 @@ if len(df_filtered) > 0:
                     with zipfile.ZipFile(zip_buf, "w") as zipf:
                         for _, row in selected_rows.iterrows():
                             cnp_id = int(row["cNPDB ID"])
-
+ 
                             # Determine AlphaFold folder
                             if cnp_id <= 1000:
                                 alphafold_folder = "Assets/3D Structure AlphaFold 1_1000"
                             else:
                                 alphafold_folder = "Assets/3D Structure AlphaFold 1001_2000"
-
+ 
                             cif_path = os.path.join(alphafold_folder, f"3D cNP {cnp_id}.cif")
                             if os.path.exists(cif_path):
                                 zipf.write(cif_path, arcname=f"AlphaFold_3D_Structures/{os.path.basename(cif_path)}")
-
+ 
                             # Determine ESMFold folder
                             if cnp_id <= 1000:
                                 esmfold_folder = "Assets/3D Structure ESMFold 1_1000"
                             else:
                                 esmfold_folder = "Assets/3D Structure ESMFold 1001_2000"
-
+ 
                             pdb_path = os.path.join(esmfold_folder, f"3D Meta cNP{cnp_id}.pdb")
                             if os.path.exists(pdb_path):
                                 zipf.write(pdb_path, arcname=f"ESMfold_3D_Structures/{os.path.basename(pdb_path)}")
-
-
+ 
+ 
                             # Add MSI images
                             for tissue_col, asset_folder in [
                                 ("MSI Tissue 1", "Assets/MSImaging"),
@@ -877,7 +880,7 @@ if len(df_filtered) > 0:
                                 msi_path = f"{asset_folder}/MSI cNP{cnp_id}{suffix}.jpeg"
                                 if os.path.exists(msi_path):
                                     zipf.write(msi_path, arcname=f"MSI_Images/{os.path.basename(msi_path)}")
-
+ 
                     zip_buf.seek(0)
                     st.download_button(
                         "Download 3D Structures + MSI",
@@ -887,30 +890,30 @@ if len(df_filtered) > 0:
                         type="primary",
                         key="download_zip"
                     )
-
+ 
         # Warning appears inside button_container (above cards)
         if st.session_state.view_details and selected_rows.empty:
             st.warning("⚠️ Please select at least one peptide to view details.")
-
-    # View Details expanded content (stays at the bottom, below the cards)
+ 
+    # View Details panel — fills the reserved spot above the cards
     if st.session_state.view_details and not selected_rows.empty:
-        for _, row in selected_rows.iterrows():
-            display_peptide_details(row)
-            st.markdown("<hr style='border: 1px solid #6a51a3; margin: 40px 0;'>", unsafe_allow_html=True)
-
+        with details_container:
+            for _, row in selected_rows.iterrows():
+                display_peptide_details(row)
+                st.markdown("<hr style='border: 1px solid #6a51a3; margin: 40px 0;'>", unsafe_allow_html=True)
+ 
 else:
     st.warning("❌ No peptides match your search criteria. Please refine your parameters.")
-
+ 
 # 5) Close container div
 st.markdown(
     "</div>",
     unsafe_allow_html=True
 )
-
+ 
 # Footer
 st.markdown("""
 <div style="text-align: center; font-size:14px; color:#2a2541;">
   <em>Last update: Apr 2026</em>
 </div>
 """, unsafe_allow_html=True)
-

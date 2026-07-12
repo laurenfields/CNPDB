@@ -13,16 +13,6 @@ st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 from sidebar import render_sidebar
 render_sidebar()
 
-# <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PJWSYXYGEM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-PJWSYXYGEM');
-</script>
-
 @st.cache_data
 def load_banner_image():
     """Load and cache the banner image."""

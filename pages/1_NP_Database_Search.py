@@ -472,7 +472,7 @@ st.markdown("""
 # --- Centered, spaced title ---
 st.markdown(
     '<h2 class="custom-title">'
-    'NEUROPEPTIDE SEARCH ENGINE'
+    'NEUROPEPTIDE SEARCH'
     '</h2>',
     unsafe_allow_html=True
 )

@@ -23,7 +23,16 @@ def get_logo_base64():
     return base64.b64encode(buffered.getvalue()).decode()
 
 def render_sidebar():
-    st.markdown("""
+    GA_MEASUREMENT_ID = "G-PJWSYXYGEM"
+ 
+    st.markdown(f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){{ dataLayer.push(arguments); }}
+        gtag('js', new Date());
+        gtag('config', '{GA_MEASUREMENT_ID}');
+    </script>
     <style>
         html, body, .stApp {
             height: 100% !important;

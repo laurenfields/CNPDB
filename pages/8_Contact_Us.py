@@ -4,8 +4,8 @@ import os
 import base64
 from sidebar import render_sidebar
 
-from utils.session_tracker import track_session
-track_session()
+# from utils.session_tracker import track_session
+# track_session()
 
 
 st.set_page_config(

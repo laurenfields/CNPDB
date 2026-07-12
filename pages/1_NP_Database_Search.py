@@ -731,19 +731,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# 3) Header row: left = checkbox, right = hit count
-col1, col2 = st.columns([1,1])
-with col1:
-    check_all = st.checkbox("Check/Uncheck All")
-with col2:
-    # align right
-    st.markdown(f"<div style='text-align: right;'>Hit: {len(df_filtered)} peptides</div>", unsafe_allow_html=True)
-
-# 4) Peptide cards in three columns
-
-selected_indices = []
-
 if len(df_filtered) > 0:
+    # Reserve a spot for buttons at the top
+    button_container = st.container()
+
+    # Hit count
+    st.markdown(f"<div style='text-align: right; margin-bottom: 5px;'>Hit: {len(df_filtered)} peptides</div>", unsafe_allow_html=True)
+    
+    # Check/Uncheck All
+    check_all = st.checkbox("Check/Uncheck All")
+
+    # 4) Peptide cards in three columns
+    selected_indices = []
     cols = st.columns(3)
 
     for i, (idx, row) in enumerate(df_filtered.iterrows()):
@@ -781,23 +780,115 @@ if len(df_filtered) > 0:
                     </div>
                 </div>
             """, unsafe_allow_html=True)
-            
-    #5. Download or view results
-    
+
+    # Now fill the button container that we reserved at the top
     selected_rows = df_filtered.loc[selected_indices] if selected_indices else pd.DataFrame()
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
-    
-    # View Details
-    with col1:
-        left_space, right_button = st.columns([1,4])
-        with right_button:
-            if "view_details" not in st.session_state:
-                st.session_state.view_details = False
-            
-            if st.button("View Details", type="primary"):
-                st.session_state.view_details = True
-    
-    # View Details
+
+    with button_container:
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+
+        # View Details
+        with col1:
+            left_space, right_button = st.columns([1,4])
+            with right_button:
+                if "view_details" not in st.session_state:
+                    st.session_state.view_details = False
+
+                if st.button("View Details", type="primary"):
+                    st.session_state.view_details = True
+
+        # Download Excel
+        with col2:
+            with st.container():
+                if selected_rows.empty:
+                    st.button("Download Search Results", type="primary", disabled=True)
+                else:
+                    excel_buf = io.BytesIO()
+                    with pd.ExcelWriter(excel_buf, engine="openpyxl") as writer:
+                        selected_rows.to_excel(writer, index=False, sheet_name="Selected")
+                    excel_buf.seek(0)
+                    st.download_button(
+                        "Download Search Results",
+                        data=excel_buf,
+                        file_name="cNPDB_Search_Results.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        type="primary",
+                        key="download_excel"
+                    )
+
+        # Download FASTA File
+        with col3:
+            with st.container():
+                if selected_rows.empty:
+                    st.button("Download FASTA File", type="primary", disabled=True)
+                else:
+                    fasta_str = "\n".join(
+                    f">{str(row['ID']).lstrip('>')}\n{str(row['Sequence'])}"
+                    for _, row in selected_rows.iterrows()
+                    )
+                    st.download_button(
+                        "Download FASTA File",
+                        data=fasta_str,
+                        file_name="cNPDB_Search_Result.fasta",
+                        mime="text/plain",
+                        type="primary",
+                        key="download_fasta"
+                    )
+
+        # Download ZIP (CIF + MSI)
+        with col4:
+            with st.container():
+                if selected_rows.empty:
+                    st.button("Download 3D Structures + MSI", type="primary", disabled=True)
+                else:
+                    zip_buf = io.BytesIO()
+                    with zipfile.ZipFile(zip_buf, "w") as zipf:
+                        for _, row in selected_rows.iterrows():
+                            cnp_id = int(row["cNPDB ID"])
+
+                            # Determine AlphaFold folder
+                            if cnp_id <= 1000:
+                                alphafold_folder = "Assets/3D Structure AlphaFold 1_1000"
+                            else:
+                                alphafold_folder = "Assets/3D Structure AlphaFold 1001_2000"
+
+                            cif_path = os.path.join(alphafold_folder, f"3D cNP {cnp_id}.cif")
+                            if os.path.exists(cif_path):
+                                zipf.write(cif_path, arcname=f"AlphaFold_3D_Structures/{os.path.basename(cif_path)}")
+
+                            # Determine ESMFold folder
+                            if cnp_id <= 1000:
+                                esmfold_folder = "Assets/3D Structure ESMFold 1_1000"
+                            else:
+                                esmfold_folder = "Assets/3D Structure ESMFold 1001_2000"
+
+                            pdb_path = os.path.join(esmfold_folder, f"3D Meta cNP{cnp_id}.pdb")
+                            if os.path.exists(pdb_path):
+                                zipf.write(pdb_path, arcname=f"ESMfold_3D_Structures/{os.path.basename(pdb_path)}")
+
+
+                            # Add MSI images
+                            for tissue_col, asset_folder in [
+                                ("MSI Tissue 1", "Assets/MSImaging"),
+                                ("MSI Tissue 2", "Assets/MSImaging"),
+                                ("MSI Tissue 3", "Assets/MSImaging"),
+                            ]:
+                                suffix = " " + tissue_col.split()[-1]
+                                msi_path = f"{asset_folder}/MSI cNP{cnp_id}{suffix}.jpeg"
+                                if os.path.exists(msi_path):
+                                    zipf.write(msi_path, arcname=f"MSI_Images/{os.path.basename(msi_path)}")
+
+                    zip_buf.seek(0)
+                    st.download_button(
+                        "Download 3D Structures + MSI",
+                        data=zip_buf,
+                        file_name="cNPDB_3D_Structures_MSI.zip",
+                        mime="application/zip",
+                        type="primary",
+                        key="download_zip"
+                    )
+
+    # View Details display (stays at the bottom, below the cards)
     if st.session_state.view_details:
         if selected_rows.empty:
             st.warning("⚠️ Please select at least one peptide to view details.")
@@ -805,100 +896,6 @@ if len(df_filtered) > 0:
             for _, row in selected_rows.iterrows():
                 display_peptide_details(row)
                 st.markdown("<hr style='border: 1px solid #6a51a3; margin: 40px 0;'>", unsafe_allow_html=True)
-    
-    # Download Excel
-    with col2:
-        with st.container():
-            if selected_rows.empty:
-                st.button("Download Search Results", type="primary", disabled=True)
-                st.warning("⚠️ Please select at least one peptide to download search results.")
-            else:
-                excel_buf = io.BytesIO()
-                with pd.ExcelWriter(excel_buf, engine="openpyxl") as writer:
-                    selected_rows.to_excel(writer, index=False, sheet_name="Selected")
-                excel_buf.seek(0)
-                st.download_button(
-                    "Download Search Results",
-                    data=excel_buf,
-                    file_name="cNPDB_Search_Results.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    type="primary",
-                    key="download_excel"
-                )
-    
-    # --- Download FASTA File ---
-    with col3:
-        with st.container():
-            if selected_rows.empty:
-                st.button("Download FASTA File", type="primary", disabled=True)
-                st.warning("⚠️ Please select at least one peptide to download FASTA file.")
-            else:
-                fasta_str = "\n".join(
-                f">{str(row['ID']).lstrip('>')}\n{str(row['Sequence'])}"
-                for _, row in selected_rows.iterrows()
-                )
-                st.download_button(
-                    "Download FASTA File",
-                    data=fasta_str,
-                    file_name="cNPDB_Search_Result.fasta",
-                    mime="text/plain",
-                    type="primary",
-                    key="download_fasta"
-                )
-    
-    # --- Download ZIP (CIF + MSI) ---
-    with col4:
-        with st.container():
-            if selected_rows.empty:
-                st.button("Download 3D Structures + MSI", type="primary", disabled=True)
-                st.warning("⚠️ Please select at least one peptide to download 3D structure and MSI files.")
-            else:
-                zip_buf = io.BytesIO()
-                with zipfile.ZipFile(zip_buf, "w") as zipf:
-                    for _, row in selected_rows.iterrows():
-                        cnp_id = int(row["cNPDB ID"])
-
-                        # Determine AlphaFold folder
-                        if cnp_id <= 1000:
-                            alphafold_folder = "Assets/3D Structure AlphaFold 1_1000"
-                        else:
-                            alphafold_folder = "Assets/3D Structure AlphaFold 1001_2000"
-    
-                        cif_path = os.path.join(alphafold_folder, f"3D cNP {cnp_id}.cif")
-                        if os.path.exists(cif_path):
-                            zipf.write(cif_path, arcname=f"AlphaFold_3D_Structures/{os.path.basename(cif_path)}")
-    
-                        # Determine ESMFold folder
-                        if cnp_id <= 1000:
-                            esmfold_folder = "Assets/3D Structure ESMFold 1_1000"
-                        else:
-                            esmfold_folder = "Assets/3D Structure ESMFold 1001_2000"
-    
-                        pdb_path = os.path.join(esmfold_folder, f"3D Meta cNP{cnp_id}.pdb")
-                        if os.path.exists(pdb_path):
-                            zipf.write(pdb_path, arcname=f"ESMfold_3D_Structures/{os.path.basename(pdb_path)}")
-
-    
-                        # Add MSI images
-                        for tissue_col, asset_folder in [
-                            ("MSI Tissue 1", "Assets/MSImaging"),
-                            ("MSI Tissue 2", "Assets/MSImaging"),
-                            ("MSI Tissue 3", "Assets/MSImaging"),
-                        ]:
-                            suffix = " " + tissue_col.split()[-1]
-                            msi_path = f"{asset_folder}/MSI cNP{cnp_id}{suffix}.jpeg"
-                            if os.path.exists(msi_path):
-                                zipf.write(msi_path, arcname=f"MSI_Images/{os.path.basename(msi_path)}")
-    
-                zip_buf.seek(0)
-                st.download_button(
-                    "Download 3D Structures + MSI",
-                    data=zip_buf,
-                    file_name="cNPDB_3D_Structures_MSI.zip",
-                    mime="application/zip",
-                    type="primary",
-                    key="download_zip"
-                ) 
 
 else:
     st.warning("❌ No peptides match your search criteria. Please refine your parameters.")

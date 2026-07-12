@@ -5,6 +5,23 @@ import os
 import base64
 from io import BytesIO
 
+@st.cache_data
+def get_logo_base64():
+    """Process the logo image once and cache the base64 string."""
+    logo_path = os.path.join("Assets", "Img", "Website_Logo_2.png")
+    if not os.path.exists(logo_path):
+        return None
+
+    logo = Image.open(logo_path).convert("RGBA").resize((160, 160))
+    mask = Image.new("L", (160, 160), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, 160, 160), fill=255)
+    logo.putalpha(mask)
+
+    buffered = BytesIO()
+    logo.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
 def render_sidebar():
     st.markdown("""
     <style>
@@ -131,25 +148,17 @@ def render_sidebar():
 
     with st.sidebar:
         st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-        logo_path = os.path.join("Assets", "Img", "Website_Logo_2.png")
 
-        if os.path.exists(logo_path):
-            logo = Image.open(logo_path).convert("RGBA").resize((160, 160))
-            mask = Image.new("L", (160, 160), 0)
-            draw = ImageDraw.Draw(mask)
-            draw.ellipse((0, 0, 160, 160), fill=255)
-            logo.putalpha(mask)
-
-            buffered = BytesIO()
-            logo.save(buffered, format="PNG")
-            img_base64 = base64.b64encode(buffered.getvalue()).decode()
-
+        # Use cached logo instead of reprocessing every time
+        img_base64 = get_logo_base64()
+        if img_base64:
             st.markdown(f"""
                 <div class="logo-border">
                     <img src="data:image/png;base64,{img_base64}" class="circle-img" />
                 </div>
             """, unsafe_allow_html=True)
         else:
+            logo_path = os.path.join("Assets", "Img", "Website_Logo_2.png")
             st.error(f"Logo image not found at: {logo_path}")
             st.text(f"Working directory: {os.getcwd()}")
 

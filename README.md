@@ -2,8 +2,8 @@
   <img src="https://github.com/huongtran182/CNPDB/blob/main/Assets/Img/cNPDB_Banner.png?raw=true" alt="cNPDB Logo" width="100%" />
 </p>
 
-## Welcome to cNPDB: The Crustacean Neuropeptide Database
-
+## cNPDB: <ins>c</ins>rustacean <ins>N</ins>euro<ins>p</ins>eptide <ins>D</ins>ata<ins>b</ins>ase
+Access the website at https://cnpdatabase.streamlit.app/
 Neuropeptides are cell-to-cell signaling molecules involved in numerous physiological processes, including metabolism, development, reproduction, and behavior. They are highly conserved both structurally and functionally across the animal kingdom, making the neuropeptide study in simple invertebrate models advantageous for gaining insights into basic neurobiology principles, drug discoveries, and functional investigations that are translatable to mammalian systems. Crustaceans are profound model organisms for neuropeptide studies and have long been used to investigate the robustness of rhythmic central pattern generator, feeding behavior, and neural responses to external stimuli.
 
 Despite their significance, crustacean neuropeptides remain underrepresented in existing neuropeptide databases. To address this gap, we introduce the Crustacean Neuropeptide Database (cNPDB) – A comprehensive resource for neuropeptide research in crustacean species. cNPDB systematically curates experimentally confirmed and predicted neuropeptides from various crustacean species using genome-derived in silico mining, peer-reviewed literature, mass spectrometry-based peptidomics, and public protein databases. This database provides detailed annotations and sequences to support a range of endeavors, including comparative neurobiology, functional studies, education, and computational peptide discovery.
@@ -31,7 +31,7 @@ Each cNPDB search entry provides:
 - Experimental Mass Spectrometry Imaging data of the peptide showing their spatial distribution in tissues
 ---
 
-## DATABASE SOURCE AND CURATION
+## DATABASE SOURCE & CURATION
 
 cNPDB integrates data from peer-reviewed studies and public proteomics repositories:
 
@@ -63,7 +63,7 @@ Stay updated on the latest cNPDB developments by following us on our social medi
 - [**X**](https://x.com/LiResearch) and [**BlueSky**](https://bsky.app/profile/liresearch.bsky.social): @LiResearch
 - [**Facebook**](https://www.facebook.com/profile.php?id=100057624782828) and [**LinkedIn**](https://www.linkedin.com/company/lingjun-li-lab): Lingjun Li Lab
 
-## CITATION AND FUNDING
+## CITATION & FUNDING
 If you use cNPDB in your research, please cite:
 
 Tran, V.N.H.; Duong, T.U.; Fields, L.; Tourloukis, K.; Beaver, M.; and Li, L. cNPDB: A comprehensive empirical crustacean neuropeptide database. bioRxiv. 2025.

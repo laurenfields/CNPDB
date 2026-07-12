@@ -4,8 +4,8 @@ from PIL import Image
 import os
 import base64
 
-from utils.session_tracker import track_session
-session_count = track_session()
+# from utils.session_tracker import track_session
+# session_count = track_session()
 
 # Page settings
 st.set_page_config(

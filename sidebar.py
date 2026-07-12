@@ -23,7 +23,7 @@ def get_logo_base64():
     return base64.b64encode(buffered.getvalue()).decode()
 
 def render_sidebar():
-    GA_MEASUREMENT_ID = "G-PJWSYXYGEM"
+    GA_MEASUREMENT_ID = "G-VWK5FWH61R"
  
     st.markdown(
         f"""

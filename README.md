@@ -2,7 +2,7 @@
   <img src="https://github.com/huongtran182/CNPDB/blob/main/Assets/Img/cNPDB_Banner.png?raw=true" alt="cNPDB Logo" width="100%" />
 </p>
 
-## cNPDB: <ins>c</ins>rustacean <ins>N</ins>euro<ins>p</ins>eptide <ins>D</ins>ata<ins>b</ins>ase
+## cNPDB: <ins>C</ins>rustacean <ins>N</ins>euro<ins>p</ins>eptide <ins>D</ins>ata<ins>b</ins>ase
 
 Access the website at https://cnpdatabase.streamlit.app/
 

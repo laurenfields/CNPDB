@@ -7,6 +7,15 @@ from io import StringIO
 from Bio.Align import substitution_matrices
 import re
 
+# Physicochemical-property and sequence logic live in shared, unit-tested
+# modules so the app, database, and QC scripts never drift apart.
+from utils.peptide_properties import (
+    calculate_properties,
+    BOMAN_SCALE as boman_scale,
+    HYDROPHOBIC_RESIDUES as hydrophobic_residues,
+)
+from utils.sequence_utils import clean_sequence, calculate_percent_identity
+
 # from utils.session_tracker import track_session
 # track_session()
 
@@ -52,58 +61,6 @@ st.markdown("""
     }      
 </style>
 """, unsafe_allow_html=True)
-
-# Hydrophobic residues
-hydrophobic_residues = set("AILMFWYV")
-
-# Boman scale
-boman_scale = {
-    'A': 0.17, 'C': 0.41, 'D': -0.07, 'E': -0.07, 'F': 1.13,
-    'G': 0.01, 'H': 0.17, 'I': 1.31, 'K': 0.99, 'L': 1.25,
-    'M': 1.27, 'N': 0.42, 'P': -0.45, 'Q': 0.58, 'R': 0.81,
-    'S': 0.13, 'T': 0.14, 'V': 1.09, 'W': 2.65, 'Y': 1.61
-}
-
-def calculate_properties(sequence):
-    sequence = sequence.upper().replace(" ", "").replace("\n", "")
-    analysis = ProteinAnalysis(sequence)
-
-    length = len(sequence)
-    molecular_weight = analysis.molecular_weight()
-    gravy = analysis.gravy()
-    instability_val = analysis.instability_index()
-    instability_status = "stable" if instability_val < 40 else "unstable"
-    
-    # Hydrophobic residue %
-    hydrophobic_count = sum(1 for aa in sequence if aa in hydrophobic_residues)
-    hydrophobic_pct = (hydrophobic_count / length) * 100 if length > 0 else 0
-
-    pI = analysis.isoelectric_point()
-    net_charge = analysis.charge_at_pH(7.0)
-
-    # Aliphatic Index
-    nA = sequence.count('A')
-    nV = sequence.count('V')
-    nI = sequence.count('I')
-    nL = sequence.count('L')
-    aliphatic_index = (nA + 2.9 * nV + 3.9 * (nI + nL)) / length * 100 if length > 0 else 0
-
-    # Boman Index
-    boman_total = sum(boman_scale.get(aa, 0) for aa in sequence)
-    boman_index = boman_total / length if length > 0 else 0
-
-    return {
-        "Peptide Sequence": sequence,
-        "Molecular Weight": round(molecular_weight, 3),
-        "Length": length,
-        "GRAVY Score": round(gravy, 3),
-        "% Hydrophobic Residue": round(hydrophobic_pct, 2),
-        "Instability Index": f"{round(instability_val, 3)} ({instability_status})",
-        "Isoelectric Point (pI)": round(pI, 2),
-        "Net Charge (pH 7.0)": round(net_charge, 2),
-        "Aliphatic Index": round(aliphatic_index, 2),
-        "Boman Index": round(boman_index, 3)
-    }
 
 # Page layout
 st.markdown("""
@@ -204,16 +161,8 @@ with col_reset_mid:
         st.session_state.use_database = False
 
 
-# Utility functions
-def clean_sequence(seq):
-    lines = seq.strip().splitlines()
-    clean_lines = [line.strip() for line in lines if not line.startswith(">")]
-    return ''.join(clean_lines).upper()
-
-def calculate_percent_identity(seqA, seqB):
-    matches = sum(1 for a, b in zip(seqA, seqB) if a == b)
-    return (matches / len(seqA)) * 100 if seqA else 0
-
+# Utility functions (clean_sequence and calculate_percent_identity are imported
+# from utils.sequence_utils above)
 def custom_format_alignment(aln):
     seqA = aln.seqA
     seqB = aln.seqB

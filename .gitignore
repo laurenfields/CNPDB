@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Literature-mining outputs (regenerated on each run)
+DataCuration/new_papers*.csv
+DataCuration/peptide_references*.csv

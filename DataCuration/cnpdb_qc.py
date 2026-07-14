@@ -28,10 +28,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import peptide_properties as pp
 from utils import sequence_utils as su
 
-DEFAULT_DB = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "Assets", "20260418_cNPDB.xlsx",
-)
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_DB = os.path.join(REPO_ROOT, "Assets", "20260418_cNPDB.xlsx")
+
+# Canonical folders. Anything in outputs/ is machine-generated and safe to
+# overwrite; staging/ holds proposed DB additions awaiting curator sign-off.
+CURATION_DIR = os.path.join(REPO_ROOT, "DataCuration")
+OUTPUTS_DIR = os.path.join(CURATION_DIR, "outputs")
+STAGING_DIR = os.path.join(CURATION_DIR, "staging")
+REPORTS_DIR = os.path.join(CURATION_DIR, "reports")
 
 # Property column -> (callable(seq) -> value, absolute tolerance)
 PROPERTY_CHECKS = {
@@ -226,7 +231,10 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Run cNPDB quality control.")
     ap.add_argument("database", nargs="?", default=DEFAULT_DB,
                     help="path to the .xlsx or .parquet database")
-    ap.add_argument("--out", default=None, help="write flagged issues to this CSV")
+    ap.add_argument("--out", nargs="?", const=os.path.join(OUTPUTS_DIR, "qc_flagged_issues.csv"),
+                    default=None,
+                    help="write flagged issues to this CSV "
+                         "(bare --out writes outputs/qc_flagged_issues.csv)")
     args = ap.parse_args(argv)
 
     df = load_database(args.database)

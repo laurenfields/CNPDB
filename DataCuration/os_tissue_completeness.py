@@ -38,7 +38,7 @@ import pandas as pd
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from DataCuration.cnpdb_qc import DEFAULT_DB, load_database  # noqa: E402
+from DataCuration.cnpdb_qc import DEFAULT_DB, OUTPUTS_DIR, load_database  # noqa: E402
 from DataCuration.lit_mining import europepmc_search  # noqa: E402
 
 MIN_SEQ_LEN = 6
@@ -183,7 +183,7 @@ def main(argv=None):
     ap.add_argument("--db", default=DEFAULT_DB)
     ap.add_argument("--limit", type=int, default=None, help="check only the first N peptides")
     ap.add_argument("--min-len", type=int, default=MIN_SEQ_LEN)
-    ap.add_argument("--out", default="os_tissue_gaps.csv")
+    ap.add_argument("--out", default=os.path.join(OUTPUTS_DIR, "os_tissue_gaps.csv"))
     args = ap.parse_args(argv)
 
     db = load_database(args.db)

@@ -32,7 +32,7 @@ import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from DataCuration.cnpdb_qc import DEFAULT_DB, load_database  # noqa: E402
+from DataCuration.cnpdb_qc import DEFAULT_DB, OUTPUTS_DIR, load_database  # noqa: E402
 from utils.peptide_properties import STANDARD_AA  # noqa: E402
 from utils.sequence_utils import strip_inline_modifications  # noqa: E402
 
@@ -110,7 +110,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="cNPDB coverage audit vs NeuroPep.")
     ap.add_argument("--db", default=DEFAULT_DB)
     ap.add_argument("--neuropep-dir", default=NEUROPEP_DIR)
-    ap.add_argument("--outdir", default=None, help="write CSVs here")
+    ap.add_argument("--outdir", default=OUTPUTS_DIR, help="write CSVs here")
     args = ap.parse_args(argv)
 
     df = load_database(args.db)

@@ -117,9 +117,17 @@ def resolve_pmid(pmid, session: requests.Session | None = None) -> dict:
 
 
 def make_id_header(cnpdb_id, family, os_abbr, existence, mz, tissue, seq) -> str:
-    return (f">cNP|{int(cnpdb_id):04d} Family={family} OS={os_abbr} "
+    """Build the cNPDB FASTA/ID header.
+
+    Matches the shipping convention: multi-value OS/Tissue are joined with ``_``
+    (not ``;``), and ``Seq=`` carries the **active** sequence (with PTM suffix),
+    e.g. ``>cNP|0003 Family=... OS=Cbo_Cpro ... Tissue=PO_PO Seq=YSFGLamide``.
+    """
+    def _join(v):
+        return str(v).replace(";", "_").replace(",", "_").strip() if v else "VERIFY"
+    return (f">cNP|{int(cnpdb_id):04d} Family={family} OS={_join(os_abbr)} "
             f"Existence={existence or 'VERIFY'} mz={mz} "
-            f"Tissue={tissue or 'VERIFY'} Seq={seq}")
+            f"Tissue={_join(tissue)} Seq={seq}")
 
 
 def build_staging(overlooked: pd.DataFrame, db: pd.DataFrame,
@@ -197,7 +205,7 @@ def finalize(staging: pd.DataFrame) -> pd.DataFrame:
         out.at[i, "Active Sequence"] = active
         out.at[i, "ID"] = make_id_header(r["cNPDB ID"], r["Family"], r["OS"],
                                          r.get("Existence", ""), round(mass, 5),
-                                         r.get("Tissue", ""), seq)
+                                         r.get("Tissue", ""), active)
     return out[[c for c in DB_COLUMNS if c in out.columns]]
 
 

@@ -94,6 +94,27 @@ def test_accepts_sulfation_when_applied(db):
     assert ma.validate(add, db) == []
 
 
+# --- scope ruling: classical neuropeptides only (forward-looking) -----------
+@pytest.mark.parametrize("family", [
+    "AMP", "HDAP", "Histone-2A-derived AMP", "Actin", "eIF5A", "Cryptocyanin",
+])
+def test_rejects_out_of_scope_families(db, family):
+    problems = ma.validate(_addition(Family=family), db)
+    assert any("out of scope" in p for p in problems)
+
+
+@pytest.mark.parametrize("family", [
+    "RFamide", "Allatostatin-A_type", "Orcokinin", "CHH", "Natalisin", "PDH",
+])
+def test_accepts_neuropeptide_families(db, family):
+    assert ma.validate(_addition(Family=family), db) == []
+
+
+def test_is_out_of_scope_is_case_insensitive():
+    assert ma.is_out_of_scope("actin") and ma.is_out_of_scope("ACTIN")
+    assert not ma.is_out_of_scope("RFamide")
+
+
 def test_merge_concatenates_and_sorts_by_id(db):
     merged = ma.merge(db, _addition(cid=2))
     assert len(merged) == 2

@@ -46,6 +46,25 @@ from utils import sequence_utils as su  # noqa: E402
 REPO_ROOT = qc.REPO_ROOT
 MASS_TOL = 0.02  # Da
 
+# Scope ruling (2026-07): cNPDB is a **classical neuropeptide** resource.
+# Antimicrobial and housekeeping-derived peptides are out of scope and are
+# refused at merge time, so they stop resurfacing in every literature screen.
+#
+# This is FORWARD-LOOKING only. The shipping database already contains 35 such
+# entries (16 Cryptocyanin, 2 Actin, 17 "Others") -- and one of them,
+# LTEELANQEELLAK (cNPDB ID 855), is Figure 4D of the manuscript. Whether to
+# retire those is a separate call for the team; this guard does not touch them.
+NON_NEUROPEPTIDE_FAMILIES = {
+    "amp", "hdap", "antimicrobial", "histone", "actin", "eif5a", "eif",
+    "housekeeping", "cryptocyanin", "hemocyanin", "tubulin",
+}
+
+
+def is_out_of_scope(family) -> bool:
+    """True if a family is antimicrobial/housekeeping rather than a neuropeptide."""
+    fam = str(family).strip().lower()
+    return any(bad in fam for bad in NON_NEUROPEPTIDE_FAMILIES)
+
 
 def validate(additions: pd.DataFrame, db: pd.DataFrame) -> list[str]:
     """Return a list of blocking problems. Empty list == safe to merge."""
@@ -99,6 +118,12 @@ def validate(additions: pd.DataFrame, db: pd.DataFrame) -> list[str]:
             v = r.get(col)
             if pd.isna(v) or str(v).strip() in ("", "nan", "VERIFY"):
                 problems.append(f"{tag}: {col} is blank or still marked VERIFY")
+
+        if is_out_of_scope(r.get("Family")):
+            problems.append(
+                f"{tag}: Family={r.get('Family')!r} is out of scope -- cNPDB is a "
+                f"classical neuropeptide resource (antimicrobial/housekeeping-derived "
+                f"peptides are excluded).")
 
         # The agreed convention: mass == [M+H]+ of sequence + declared PTMs.
         stored = r.get("Monoisotopic Mass")

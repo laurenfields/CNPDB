@@ -45,6 +45,19 @@ Everything above regenerates itself. The only thing a human must produce is the
 | `staging_additions.xlsx` | The 59 overlooked sequences as schema-shaped rows (IDs 1517–1575), families mapped, DOIs resolved, properties computed | **PTM confirmation** (see below) |
 | `candidates_2026_screened.csv` | 57 sequences from the 2026 screen; `in_db` column marks the **38 that are new** | staging into schema rows |
 
+### Standing rulings (2026-07)
+- **PTM / mass convention:** the stored `Monoisotopic Mass` is the **[M+H]⁺ of the
+  sequence plus every declared PTM** (amidation, pyro-Glu, sulfation, phospho…).
+  `merge_additions.py` refuses any row whose mass disagrees with its declared PTM,
+  so the ±0.98 Da error class the QC pass found cannot re-enter.
+- **PTM values are verified per-peptide, never inferred.** The staging file's
+  `_likely_amidated` column is a *hint from the family*, not evidence. A curator
+  confirms amidation from the source paper before the row can merge.
+- **Scope: classical neuropeptides only.** AMPs, HDAPs, and housekeeping-derived
+  fragments (actin, eIF5A) are refused at merge. *Forward-looking only* — see the
+  warning in [`reports/SCREEN_2026.md`](reports/SCREEN_2026.md) about the 35 existing
+  entries this contradicts.
+
 ### Why staging exists (the PTM problem)
 Most crustacean neuropeptides are C-terminally amidated, which shifts the monoisotopic
 mass by −0.984 Da. The NeuroPep export doesn't record it, and **guessing would recreate the

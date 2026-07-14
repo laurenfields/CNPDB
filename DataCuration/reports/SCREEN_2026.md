@@ -55,8 +55,23 @@ Both need new `OS` abbreviations and Glossary entries.
 | ChemNeuro (10.1021/acschemneuro.6c00123) | `si_003/si_004.xlsx` | 147+136 predicted-mature; 20,109 predicted-all |
 | HILIC lobster (10.1101/2025.06.26.661634) | Table S1 | ~50 first-reported *H. americanus* peptides (carried over from the earlier screen) |
 
-## Scope decision still needed: AMPs / housekeeping-derived peptides
-Two independent screens have now surfaced the same question, so it needs a one-time ruling.
+## ✅ RULING (2026-07): AMPs / housekeeping-derived peptides are OUT OF SCOPE
+cNPDB is a **classical neuropeptide** resource. Antimicrobial peptides (AMPs),
+histone-2A–derived AMPs (HDAPs), and housekeeping-derived fragments (actin, eIF5A)
+are **excluded**. This is enforced at merge time by
+`merge_additions.is_out_of_scope()`, so they will not resurface in future screens.
+
+The peptides listed below are therefore **dropped, not staged**.
+
+> ⚠ **Unresolved tension with the existing database.** The ruling is forward-looking
+> only. The shipping database already contains **35 entries** that this rule would
+> exclude — 16 `Cryptocyanin`, 2 `Actin`, 17 `Others` — and one of them,
+> **`LTEELANQEELLAK` (cNPDB ID 855), is Figure 4D of the manuscript**, captioned "an
+> actin peptide." Retiring them would contradict the published figure; keeping them
+> makes the database internally inconsistent with its own stated scope. **The team
+> needs to decide this separately** — the merge guard does not touch existing entries.
+
+### The peptides this ruling drops
 
 **From 10.1021/acsomega.6c00679 (SI Table S1)** — ~20 predicted **antimicrobial peptides**:
 *C. sapidus* RLLYR series; *H. americanus* FWGMLK / FWGRLAKGVL series.

@@ -36,3 +36,19 @@ def test_filter_new_papers_excludes_seen_and_dedupes_batch():
 def test_filter_new_papers_all_seen():
     hits = [{"doi": "10.1/x", "pmid": "1"}]
     assert lm.filter_new_papers(hits, {"10.1/x"}) == []
+
+
+def test_seen_list_roundtrip(tmp_path):
+    path = str(tmp_path / "seen.txt")
+    assert lm.load_seen_dois(path) == set()          # missing file -> empty
+    lm.append_seen_dois(path, ["10.1/A", "https://doi.org/10.2/B"])
+    assert lm.load_seen_dois(path) == {"10.1/a", "10.2/b"}
+    # Appending is idempotent + additive, and normalizes.
+    lm.append_seen_dois(path, ["10.2/B", "10.3/c"])
+    assert lm.load_seen_dois(path) == {"10.1/a", "10.2/b", "10.3/c"}
+
+
+def test_seen_list_ignores_comments_and_blanks(tmp_path):
+    path = tmp_path / "seen.txt"
+    path.write_text("# header\n10.1/x\n\n  10.2/y  \n", encoding="utf-8")
+    assert lm.load_seen_dois(str(path)) == {"10.1/x", "10.2/y"}

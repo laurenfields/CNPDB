@@ -77,6 +77,28 @@ def known_dois(df: pd.DataFrame) -> set[str]:
     return out
 
 
+def load_seen_dois(path: str) -> set[str]:
+    """Read a persisted seen-DOI list (one per line; ``#`` comments ignored)."""
+    if not path or not os.path.exists(path):
+        return set()
+    out = set()
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                out.add(normalize_doi(line))
+    return {d for d in out if d}
+
+
+def append_seen_dois(path: str, dois) -> None:
+    """Append new DOIs to the persisted seen-list, keeping it sorted & unique."""
+    combined = load_seen_dois(path) | {normalize_doi(d) for d in dois if normalize_doi(d)}
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write("# DOIs already surfaced by lit_mining discover; do not edit by hand.\n")
+        for d in sorted(combined):
+            fh.write(d + "\n")
+
+
 def filter_new_papers(hits: list[dict], seen: set[str]) -> list[dict]:
     """Return hits whose DOI is not in ``seen`` (deduped within the batch too)."""
     new, batch = [], set()
@@ -127,16 +149,21 @@ def europepmc_search(query: str, page_size: int = 100, max_pages: int = 5,
 
 def discover_recent_papers(df: pd.DataFrame, since: str, until: str | None = None,
                            query: str = DISCOVER_QUERY,
-                           session: requests.Session | None = None) -> pd.DataFrame:
+                           session: requests.Session | None = None,
+                           extra_seen: set[str] | None = None) -> pd.DataFrame:
     """Find recent on-topic papers not already cited in the database.
 
-    ``since``/``until`` are ISO dates (YYYY-MM-DD). Returns a DataFrame of
-    candidate papers for a curator to screen for new sequences.
+    ``since``/``until`` are ISO dates (YYYY-MM-DD). ``extra_seen`` is a set of
+    already-surfaced DOIs (e.g. from a persisted seen-list) to exclude on top of
+    the DOIs already in the database -- this is what makes a scheduled monthly
+    run show only *newly appeared* papers. Returns a DataFrame of candidate
+    papers for a curator to screen for new sequences.
     """
     date_clause = f'(FIRST_PDATE:[{since} TO {until or "3000-12-31"}])'
     full_query = f"{query} AND {date_clause}"
     hits = europepmc_search(full_query, session=session)
-    new = filter_new_papers(hits, known_dois(df))
+    seen = known_dois(df) | (extra_seen or set())
+    new = filter_new_papers(hits, seen)
     cols = ["title", "authors", "journal", "year", "doi", "pmid", "source_query"]
     return pd.DataFrame(new, columns=cols).sort_values("year", ascending=False)
 
@@ -176,6 +203,11 @@ def main(argv=None):
     d.add_argument("--until", default=None, help="ISO date (default: open-ended)")
     d.add_argument("--db", default=DEFAULT_DB)
     d.add_argument("--out", default="new_papers.csv")
+    d.add_argument("--seen", default=None,
+                   help="path to a persisted seen-DOI list; excludes already-surfaced "
+                        "papers so each run shows only what is new")
+    d.add_argument("--update-seen", action="store_true",
+                   help="append this run's DOIs to the --seen file")
 
     r = sub.add_parser("references", help="collect references for existing peptides")
     r.add_argument("--db", default=DEFAULT_DB)
@@ -186,9 +218,14 @@ def main(argv=None):
     df = load_database(args.db)
 
     if args.mode == "discover":
-        out = discover_recent_papers(df, since=args.since, until=args.until)
+        extra_seen = load_seen_dois(args.seen) if args.seen else set()
+        out = discover_recent_papers(df, since=args.since, until=args.until, extra_seen=extra_seen)
         out.to_csv(args.out, index=False)
-        print(f"Found {len(out)} candidate new papers since {args.since} -> {args.out}")
+        print(f"Found {len(out)} candidate new papers since {args.since} "
+              f"(excluding {len(extra_seen)} already-seen) -> {args.out}")
+        if args.seen and args.update_seen:
+            append_seen_dois(args.seen, out["doi"].tolist())
+            print(f"Updated seen-list -> {args.seen}")
     else:
         seqs = df["Sequence"].dropna().astype(str).tolist()
         if args.limit:

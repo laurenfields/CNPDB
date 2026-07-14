@@ -46,6 +46,75 @@ DISCOVER_QUERY = (
     'AND (crustacean OR decapod OR crab OR lobster OR crayfish OR shrimp OR Crustacea)'
 )
 
+# --- Crustacean-relevance vocabulary (cNPDB scope is Crustacea only) ---------
+# General crustacean clade terms.
+CRUSTACEAN_TERMS = {
+    "crustacean", "crustacea", "decapod", "decapoda", "malacostraca", "brachyura",
+    "crab", "lobster", "crayfish", "shrimp", "prawn", "isopod", "amphipod",
+    "copepod", "barnacle", "krill", "cladocera", "stomatogastric",
+}
+# Scientific names + genera of the 30 cNPDB species (from the Glossary).
+CRUSTACEAN_SPECIES = {
+    "cancer borealis", "carcinus maenas", "callinectes sapidus", "homarus americanus",
+    "litopenaeus vannamei", "penaeus vannamei", "procambarus clarkii", "orconectes limosus",
+    "ocypode ceratophthalm", "scylla paramamosain", "scylla serrata", "nephrops norvegicus",
+    "panulirus", "cancer irroratus", "cancer magister", "metacarcinus magister",
+    "cancer pagurus", "cancer productus", "daphnia pulex", "armadillidium", "eurydice",
+    "lithodes maja", "metapenaeus ensis", "marsupenaeus japonicus", "macrobrachium",
+    "penaeus aztecus", "pandalus borealis", "procambarus bouvieri", "pugettia producta",
+    "sagmariasus verreauxi", "penaeus monodon",
+}
+NEUROPEPTIDE_TERMS = {
+    "neuropeptide", "neuropeptidom", "peptidom", "peptide hormone", "allatostatin",
+    "rfamide", "ryamide", "orcokinin", "tachykinin", "pyrokinin", "sulfakinin",
+    "crustacean cardioactive", "hyperglycemic hormone", "hyperglycaemic hormone",
+    "pigment dispersing", "corazonin", "bursicon", "sifamide", "leucokinin",
+    "proctolin", "myosuppressin", "eclosion hormone", "ecdysis", "natalisin", "ccap",
+    " chh", " mih", " gih", " vih",
+}
+DISCOVERY_TERMS = {
+    "novel", "new ", "de novo", "identif", "characteriz", "characteris", "discover",
+    "profiling", "neuropeptidom", "peptidom", "mass spectrom", "transcriptom",
+    "sequenc", "genome", "prohormone", "precursor",
+}
+# Non-crustacean model organisms; used only to DROP a paper when NO crustacean
+# signal is present (a crustacean-vs-insect comparison still counts as relevant).
+EXCLUDE_ORGANISMS = {
+    "drosophila", "mouse", "murine", " rat ", " rats", "human", "zebrafish", "bombyx",
+    "aphid", "mosquito", "honeybee", "honey bee", "tribolium", "caenorhabditis",
+    "c. elegans", "arabidopsis", "nematode", "tick", "spider", "locust", "cockroach",
+}
+
+
+def _contains_any(text: str, terms) -> bool:
+    return any(t in text for t in terms)
+
+
+def classify_relevance(title: str, abstract: str = "") -> dict:
+    """Score a paper for crustacean-neuropeptide relevance from its text.
+
+    Returns a dict with booleans (``crustacean``, ``neuropeptide``, ``discovery``,
+    ``excluded_organism``), an integer ``score``, and ``keep`` -- True when the
+    paper is crustacean AND neuropeptide-related (cNPDB scope). Pure/offline.
+    """
+    text = f"{title} {abstract}".lower()
+    crust = _contains_any(text, CRUSTACEAN_TERMS) or _contains_any(text, CRUSTACEAN_SPECIES)
+    npep = _contains_any(text, NEUROPEPTIDE_TERMS)
+    disc = _contains_any(text, DISCOVERY_TERMS)
+    excl = _contains_any(text, EXCLUDE_ORGANISMS)
+    score = (3 if crust else 0) + (2 if npep else 0) + (1 if disc else 0)
+    if excl and not crust:
+        score = 0
+    return {"crustacean": crust, "neuropeptide": npep, "discovery": disc,
+            "excluded_organism": excl, "score": score, "keep": bool(crust and npep)}
+
+
+def rank_by_relevance(df: pd.DataFrame, title_col: str = "title") -> pd.DataFrame:
+    """Add relevance columns and return the frame sorted best-first, keepers on top."""
+    rel = df[title_col].fillna("").apply(classify_relevance).apply(pd.Series)
+    out = pd.concat([df.reset_index(drop=True), rel], axis=1)
+    return out.sort_values(["keep", "score", "year"], ascending=[False, False, False])
+
 
 # ---------------------------------------------------------------------------
 # Pure helpers (unit-tested)

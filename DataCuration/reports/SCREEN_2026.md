@@ -55,11 +55,28 @@ Both need new `OS` abbreviations and Glossary entries.
 | ChemNeuro (10.1021/acschemneuro.6c00123) | `si_003/si_004.xlsx` | 147+136 predicted-mature; 20,109 predicted-all |
 | HILIC lobster (10.1101/2025.06.26.661634) | Table S1 | ~50 first-reported *H. americanus* peptides (carried over from the earlier screen) |
 
-## Scope decision still needed: AMPs
-10.1021/acsomega.6c00679 SI Table S1 reports ~20 predicted **antimicrobial peptides**
-(*C. sapidus*: RLLYR series; *H. americanus*: FWGMLK / FWGRLAKGVL series). These are
-crustacean but **not classical neuropeptides** — include only if cNPDB's scope admits
-endogenous bioactive/AMP peptides. Same question as the HDAP/actin hits from the earlier screen.
+## Scope decision still needed: AMPs / housekeeping-derived peptides
+Two independent screens have now surfaced the same question, so it needs a one-time ruling.
+
+**From 10.1021/acsomega.6c00679 (SI Table S1)** — ~20 predicted **antimicrobial peptides**:
+*C. sapidus* RLLYR series; *H. americanus* FWGMLK / FWGRLAKGVL series.
+
+**From 10.64898/2026.05.04.721987 (hybrid sequencing, Fields et al.)** — histone-2A–derived
+AMPs and housekeeping fragments, all confirmed absent from cNPDB:
+
+| Sequence | Note | Species |
+|----------|------|---------|
+| AGLQFPVGR | histone-2A–derived AMP (HDAP) | *C. sapidus* |
+| SSRAGLQFPVGR | HDAP, N-extended | *C. sapidus* |
+| AGLQFPVAR | HDAP isoform | *C. sapidus* |
+| SYGANFSWNKR | ETC-related | *C. sapidus* |
+| TLEAKLLR | predicted AMP + neuropeptide, uncharacterized | *C. sapidus* |
+| RVAPEEHP, LSKQEYD | actin fragments (housekeeping) | *C. borealis* |
+| ALKAMAK | eIF5A-1 fragment (housekeeping) | *C. borealis* |
+
+All are crustacean but **not classical neuropeptides**. Include only if cNPDB's scope admits
+endogenous bioactive / AMP peptides. If the answer is no, these drop out permanently and the
+question stops recurring in each screen.
 
 ---
 

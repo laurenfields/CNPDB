@@ -36,7 +36,7 @@ import pandas as pd
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from DataCuration.cnpdb_qc import DEFAULT_DB, load_database  # noqa: E402
+from DataCuration.cnpdb_qc import DEFAULT_DB, OUTPUTS_DIR, STAGING_DIR, load_database  # noqa: E402
 from utils import peptide_properties as pp  # noqa: E402
 
 EPMC = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
@@ -205,14 +205,14 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Stage/finalize cNPDB additions.")
     sub = ap.add_subparsers(dest="mode")
     ap.add_argument("--db", default=DEFAULT_DB)
-    ap.add_argument("--overlooked", default=os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "audit_overlooked_neuropep.csv"))
-    ap.add_argument("--out", default="staging_additions.xlsx")
+    ap.add_argument("--overlooked",
+                    default=os.path.join(OUTPUTS_DIR, "audit_overlooked_neuropep.csv"))
+    ap.add_argument("--out", default=os.path.join(STAGING_DIR, "staging_additions.xlsx"))
     ap.add_argument("--no-resolve", action="store_true", help="skip PMID->DOI lookup")
 
     f = sub.add_parser("finalize", help="recompute mass from confirmed PTM")
-    f.add_argument("--staging", required=True)
-    f.add_argument("--out", default="finalized_additions.xlsx")
+    f.add_argument("--staging", default=os.path.join(STAGING_DIR, "staging_additions.xlsx"))
+    f.add_argument("--out", default=os.path.join(STAGING_DIR, "finalized_additions.xlsx"))
 
     args = ap.parse_args(argv)
 

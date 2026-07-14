@@ -8,6 +8,10 @@ venv/
 # OS
 .DS_Store
 
-# Literature-mining outputs (regenerated on each run)
-DataCuration/new_papers*.csv
+# Ad-hoc tool runs dropped in the repo root. The canonical, CI-regenerated
+# results live in DataCuration/outputs/ and ARE tracked.
+/new_papers*.csv
+/shortlist*.csv
+/os_tissue_gaps*.csv
+/peptide_references*.csv
 DataCuration/peptide_references*.csv

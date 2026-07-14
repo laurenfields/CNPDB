@@ -1,5 +1,0 @@
-cNPDB ID,Sequence,Family,cNPDB_OS,missing_OS,cNPDB_Tissue,missing_Tissue,lit_species,lit_tissue,n_papers,supporting
-1,LRVAPEESPVL,Actin,HoA,Csap,CG,hemolymph,Csap,hemolymph,2,10.1016/j.jasms.2008.12.007;10.1021/acs.jproteome.9b00026
-7,SYDFGL,Allatostatin-A_type,HoA,Sver,ES,CNS,Sver,CNS,1,10.1371/journal.pone.0097323
-19,AGPYAFGL,Allatostatin-A_type,Cmae;Csap;HoA,Olim;Pcla,Br;ES;PO,,Olim;Pcla,,1,10.1016/s0196-9781(99)00052-2
-63,SAGPYAFGL,Allatostatin-A_type,Olim,Pcla,CNS;CoG;OG;PO;STG,,Olim;Pcla,,1,10.1016/s0196-9781(99)00052-2

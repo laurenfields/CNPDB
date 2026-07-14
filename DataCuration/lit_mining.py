@@ -277,6 +277,8 @@ def main(argv=None):
                         "papers so each run shows only what is new")
     d.add_argument("--update-seen", action="store_true",
                    help="append this run's DOIs to the --seen file")
+    d.add_argument("--shortlist", default=None,
+                   help="also write a crustacea-only, discovery-ranked shortlist here")
 
     r = sub.add_parser("references", help="collect references for existing peptides")
     r.add_argument("--db", default=DEFAULT_DB)
@@ -292,6 +294,12 @@ def main(argv=None):
         out.to_csv(args.out, index=False)
         print(f"Found {len(out)} candidate new papers since {args.since} "
               f"(excluding {len(extra_seen)} already-seen) -> {args.out}")
+        if args.shortlist:
+            ranked = rank_by_relevance(out)
+            short = ranked[ranked["keep"] & ranked["discovery"]]
+            short.to_csv(args.shortlist, index=False)
+            print(f"Crustacea-only discovery shortlist: {len(short)} of {len(out)} "
+                  f"-> {args.shortlist}")
         if args.seen and args.update_seen:
             append_seen_dois(args.seen, out["doi"].tolist())
             print(f"Updated seen-list -> {args.seen}")

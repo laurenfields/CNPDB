@@ -48,6 +48,9 @@ jobs:
             --out "DataCuration/outputs/new_papers_${STAMP}.csv" \
             --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
 
+      - name: Queue papers whose SI needs a manual pull
+        run: python -m DataCuration.si_review scan --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
+
       - name: Refresh OS/tissue completeness sweep
         run: python -m DataCuration.os_tissue_completeness
 
@@ -55,7 +58,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add DataCuration/outputs/
+          git add DataCuration/outputs/ DataCuration/si_review/queue.csv
           if git diff --cached --quiet; then
             echo "Nothing new this cycle."
           else

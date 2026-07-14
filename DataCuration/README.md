@@ -9,6 +9,8 @@ Tools for QC-ing the database and keeping it current with the literature.
 | `cnpdb_qc.py` | Quality-control engine (importable checks + CLI). |
 | `lit_mining.py` | Literature-mining pipeline (`discover` new papers, `references` back-fill). |
 | `coverage_audit.py` | Cross-check vs NeuroPep for overlooked sequences / missing species. |
+| `backfill.py` | Stage missing sequences as reviewable cNPDB rows; `finalize` after PTM confirmation. |
+| `os_tissue_completeness.py` | Per-peptide check for species/tissues reported in the literature but absent from `OS`/`Tissue`. |
 | `QC_REPORT.md` | Human-readable findings from the latest QC run. |
 | `qc_flagged_issues.csv` | Itemized, machine-readable QC findings. |
 | `COVERAGE_AUDIT.md` | Overlooked-sequence / OS-completeness findings. |
@@ -72,6 +74,14 @@ Let the monthly Action run, triage `lit_scan/new_papers_*.csv`, then pull the
 **Supplementary Information** of promising hits (SI tables hold most new sequences
 and cannot be scraped automatically). See `candidate_new_sequences_2025-2026.md`.
 
+### Crustacea-only scope filter
+cNPDB covers **Crustacea only**. `lit_mining.classify_relevance()` scores a paper
+from its title/abstract and keeps it only when it is *both* crustacean *and*
+neuropeptide-related; `rank_by_relevance()` sorts a digest best-first. This is what
+cuts a raw ~316-paper scan down to a screenable shortlist. A non-crustacean model
+organism (Drosophila, mouse, …) only vetoes a paper when **no** crustacean signal is
+present, so crustacean-vs-insect comparisons survive.
+
 ## Coverage audit (overlooked sequences & species)
 ```bash
 python -m DataCuration.coverage_audit --outdir DataCuration
@@ -79,6 +89,38 @@ python -m DataCuration.coverage_audit --outdir DataCuration
 Cross-references cNPDB against the NeuroPep species files to find sequences that
 were missed entirely and species missing from the `OS` column. Findings in
 `COVERAGE_AUDIT.md` (+ `audit_overlooked_neuropep.csv`, `audit_os_underrepresented.csv`).
+
+## Backfilling missing sequences
+```bash
+python -m DataCuration.backfill --out DataCuration/staging_additions.xlsx
+```
+Turns the overlooked list into schema-shaped rows: mapped family, resolved DOI/title,
+computed physicochemical properties, next free cNPDB IDs.
+
+**It does not write into the shipping database, by design.** `PTM` (amidation),
+`Existence`, and `Tissue` cannot be known from the NeuroPep export, and guessing the
+amidation state would reintroduce the exact mass errors the QC pass found. The staging
+file therefore carries the **unmodified** mass, an `_mass_if_amidated` alternative, a
+`_likely_amidated` hint from the family, and a `_VERIFY` column. Once a curator fills
+`PTM`/`Existence`/`Tissue`:
+
+```bash
+python -m DataCuration.backfill finalize --staging DataCuration/staging_additions.xlsx
+```
+recomputes the mass from the confirmed PTM, rebuilds the `Active Sequence` and `ID`
+header, and emits schema-clean rows ready to append.
+
+## OS / tissue completeness
+```bash
+python -m DataCuration.os_tissue_completeness --limit 100 --out gaps.csv
+```
+For each peptide, searches the literature for its exact sequence and flags crustacean
+species/tissues that papers mention but the `OS`/`Tissue` columns omit.
+
+**These are screening candidates, not facts** — a species named in a paper that
+mentions a peptide is not proof the peptide occurs there. Every proposed addition
+cites its supporting paper so a curator can confirm. Peptides shorter than 6 aa are
+skipped (short string matches retrieve too much unrelated literature).
 
 ## Adding new entries — checklist
 1. Store **bare residues** in `Sequence`; put every modification in the `PTM` column

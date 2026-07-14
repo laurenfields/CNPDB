@@ -52,3 +52,48 @@ def test_seen_list_ignores_comments_and_blanks(tmp_path):
     path = tmp_path / "seen.txt"
     path.write_text("# header\n10.1/x\n\n  10.2/y  \n", encoding="utf-8")
     assert lm.load_seen_dois(str(path)) == {"10.1/x", "10.2/y"}
+
+
+# --- crustacean relevance (cNPDB scope is Crustacea only) -------------------
+def test_relevance_keeps_crustacean_neuropeptide_paper():
+    r = lm.classify_relevance("Novel neuropeptides identified in Cancer borealis")
+    assert r["crustacean"] and r["neuropeptide"] and r["discovery"]
+    assert r["keep"] and r["score"] == 6
+
+
+def test_relevance_drops_non_crustacean_neuropeptide_paper():
+    r = lm.classify_relevance("Neuropeptide signaling in Drosophila melanogaster")
+    assert not r["crustacean"]
+    assert r["excluded_organism"]
+    assert not r["keep"] and r["score"] == 0
+
+
+def test_relevance_drops_crustacean_paper_without_neuropeptides():
+    r = lm.classify_relevance("Dietary calcium effects on growth in shrimp")
+    assert r["crustacean"] and not r["neuropeptide"]
+    assert not r["keep"]
+
+
+def test_relevance_keeps_crustacean_vs_insect_comparison():
+    # An excluded organism must NOT veto a paper that is also crustacean.
+    r = lm.classify_relevance("Comparing neuropeptides of Drosophila and the crab")
+    assert r["crustacean"] and r["excluded_organism"]
+    assert r["keep"] and r["score"] > 0
+
+
+def test_relevance_detects_species_by_scientific_name():
+    assert lm.classify_relevance("Peptidome of Homarus americanus")["crustacean"]
+    assert lm.classify_relevance("Scylla paramamosain peptide hormone")["crustacean"]
+
+
+def test_rank_by_relevance_sorts_keepers_first():
+    df = pd.DataFrame({
+        "title": ["Dietary protein in tilapia",                       # drop
+                  "Novel neuropeptides in the blue crab",             # keep, high
+                  "Neuropeptide receptors in mice"],                  # drop
+        "year": [2025, 2026, 2025],
+    })
+    ranked = lm.rank_by_relevance(df)
+    assert ranked.iloc[0]["title"] == "Novel neuropeptides in the blue crab"
+    assert bool(ranked.iloc[0]["keep"]) is True
+    assert int(ranked["keep"].sum()) == 1

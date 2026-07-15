@@ -1,0 +1,65 @@
+name: notify-email
+description: >
+  Send a cNPDB notification email to everyone in notify/recipients.txt.
+  No-ops safely (prints a notice, succeeds) when the mail secret is not set or
+  the recipient list is empty, so it never breaks a workflow.
+
+inputs:
+  subject:
+    description: Email subject line.
+    required: true
+  body:
+    description: Plain-text email body.
+    required: true
+  username:
+    description: Gmail address (pass ${{ secrets.MAIL_USERNAME }}). Empty = skip sending.
+    required: false
+    default: ""
+  password:
+    description: Gmail app password (pass ${{ secrets.MAIL_PASSWORD }}).
+    required: false
+    default: ""
+  recipients_file:
+    description: Path to the newline-delimited recipient list.
+    required: false
+    default: notify/recipients.txt
+
+runs:
+  using: composite
+  steps:
+    - name: Build recipient list
+      id: rcpt
+      shell: bash
+      run: |
+        list=""
+        if [ -f "${{ inputs.recipients_file }}" ]; then
+          # Drop comments/blank lines, keep anything that looks like an address,
+          # join with commas.
+          list=$(grep -vE '^[[:space:]]*#' "${{ inputs.recipients_file }}" \
+                 | grep -oE '[^[:space:]]+@[^[:space:]]+' | paste -sd, - || true)
+        fi
+        echo "list=${list}" >> "$GITHUB_OUTPUT"
+
+    - name: Send email
+      if: ${{ inputs.username != '' && steps.rcpt.outputs.list != '' }}
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: "465"
+        secure: true
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+        from: cNPDB notifications <${{ inputs.username }}>
+        to: ${{ steps.rcpt.outputs.list }}
+        subject: ${{ inputs.subject }}
+        body: ${{ inputs.body }}
+
+    - name: Explain skip
+      if: ${{ inputs.username == '' || steps.rcpt.outputs.list == '' }}
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.username }}" ]; then
+          echo "::notice::MAIL_USERNAME secret not set - email skipped. Add the Gmail secret in repo Settings to enable notifications."
+        else
+          echo "::notice::No recipients in ${{ inputs.recipients_file }} - email skipped."
+        fi

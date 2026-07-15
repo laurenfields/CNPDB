@@ -54,6 +54,34 @@ jobs:
       - name: Refresh OS/tissue completeness sweep
         run: python -m DataCuration.os_tissue_completeness
 
+      - name: Update the papers-to-check reminder + build email
+        id: papers
+        run: |
+          python -m DataCuration.notify_papers reconcile \
+            --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv" \
+            --list DataCuration/outputs/papers_to_check.csv \
+            --date "${STAMP}" \
+            --body-out email_body.txt
+          {
+            echo "body<<__EOF__"
+            cat email_body.txt
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+          if [ -s email_body.txt ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Email this month's papers to check
+        if: ${{ steps.papers.outputs.send == 'true' }}
+        uses: ./.github/actions/notify-email
+        with:
+          subject: "cNPDB: papers to check this month"
+          body: ${{ steps.papers.outputs.body }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+
       - name: Commit refreshed outputs
         run: |
           git config user.name  "github-actions[bot]"

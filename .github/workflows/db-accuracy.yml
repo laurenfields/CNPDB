@@ -1,0 +1,48 @@
+name: db-accuracy
+
+# When the database itself is pushed (by Jacey or anyone), re-run QC and email
+# the notification list if there are any flagged issues. This NEVER blocks the
+# update -- the new database is already in the repo; this only tells people what
+# to check. Skips the email silently when the mail secret isn't configured.
+on:
+  push:
+    paths:
+      - "Assets/20260418_cNPDB.xlsx"
+      - "Assets/20260418_cNPDB.parquet"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run QC and build the email body
+        id: qc
+        run: |
+          issues=$(python -m DataCuration.qc_email --body-out email_body.txt)
+          echo "issues=${issues}" >> "$GITHUB_OUTPUT"
+          {
+            echo "body<<__EOF__"
+            cat email_body.txt
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+          echo "QC found ${issues} issue(s)."
+
+      - name: Email if QC found issues
+        if: ${{ steps.qc.outputs.issues != '0' }}
+        uses: ./.github/actions/notify-email
+        with:
+          subject: "cNPDB: database updated - QC found issues to check"
+          body: ${{ steps.qc.outputs.body }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}

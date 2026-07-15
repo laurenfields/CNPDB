@@ -34,6 +34,7 @@ jobs:
           {
             echo "body<<__EOF__"
             cat email_body.txt
+            echo ""
             echo "__EOF__"
           } >> "$GITHUB_OUTPUT"
           echo "QC found ${issues} issue(s)."

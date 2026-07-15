@@ -43,7 +43,7 @@ jobs:
         if: ${{ steps.qc.outputs.issues != '0' }}
         uses: ./.github/actions/notify-email
         with:
-          subject: "cNPDB: database updated - QC found issues to check"
+          subject: "cNPDB: database updated - QC found new issues to check"
           body: ${{ steps.qc.outputs.body }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}

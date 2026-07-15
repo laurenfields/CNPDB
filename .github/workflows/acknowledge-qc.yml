@@ -1,0 +1,48 @@
+name: acknowledge-qc
+
+# Manually mark QC issues as reviewed & accepted so they stop triggering the
+# database-accuracy email. Run this AFTER a human has reviewed the issues and
+# decided they are acceptable. It records the current issues in
+# DataCuration/outputs/qc_acknowledged.csv and commits it. Nothing is ever
+# acknowledged automatically.
+on:
+  workflow_dispatch:
+    inputs:
+      categories:
+        description: "QC categories to accept, comma-separated (e.g. missing_OS,missing_DOI). Leave BLANK to accept ALL currently-flagged issues -- use with care."
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  acknowledge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Acknowledge current QC issues
+        run: |
+          n=$(python -m DataCuration.qc_email --acknowledge \
+                --categories "${{ github.event.inputs.categories }}" \
+                --by "acknowledged via Actions by ${{ github.actor }}")
+          echo "Newly acknowledged: ${n} issue(s)."
+
+      - name: Commit the acknowledged list
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add DataCuration/outputs/qc_acknowledged.csv
+          if git diff --cached --quiet; then
+            echo "Nothing new to acknowledge."
+          else
+            git commit -m "qc: acknowledge reviewed issues (${{ github.event.inputs.categories || 'all currently flagged' }})"
+            git push
+          fi

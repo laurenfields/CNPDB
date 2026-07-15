@@ -12,11 +12,11 @@ inputs:
     description: Plain-text email body.
     required: true
   username:
-    description: Gmail address (pass ${{ secrets.MAIL_USERNAME }}). Empty = skip sending.
+    description: "SMTP username; pass secrets.MAIL_USERNAME from the workflow. Empty = skip sending."
     required: false
     default: ""
   password:
-    description: Gmail app password (pass ${{ secrets.MAIL_PASSWORD }}).
+    description: "SMTP password / app password; pass secrets.MAIL_PASSWORD from the workflow."
     required: false
     default: ""
   recipients_file:

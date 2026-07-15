@@ -1,0 +1,105 @@
+name: literature-mining
+
+# Monthly, network-bound curation refresh:
+#   1. scan Europe PMC for crustacean-neuropeptide papers not yet seen/cited
+#   2. rank them crustacea-only and emit a discovery shortlist to screen
+#   3. re-run the per-peptide OS/tissue completeness sweep against the database
+# All results are committed to DataCuration/outputs/.
+#
+# The fast offline outputs (QC, coverage audit) are refreshed by curation-refresh.yml.
+on:
+  schedule:
+    - cron: "0 8 1 * *"   # 08:00 UTC on the 1st of each month
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "ISO start date (YYYY-MM-DD)"
+        required: true
+        default: "2025-01-01"
+
+permissions:
+  contents: write
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Scan for new papers (incremental, crustacea-only shortlist)
+        env:
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+        run: |
+          SINCE="${{ github.event.inputs.since || '2025-01-01' }}"
+          STAMP="$(date +%F)"
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          python -m DataCuration.lit_mining discover \
+            --since "$SINCE" \
+            --seen DataCuration/outputs/seen_dois.txt \
+            --update-seen \
+            --out "DataCuration/outputs/new_papers_${STAMP}.csv" \
+            --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
+
+      - name: Update the papers-to-check reminder + build email
+        id: papers
+        run: |
+          python -m DataCuration.notify_papers reconcile \
+            --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv" \
+            --list DataCuration/outputs/papers_to_check.csv \
+            --date "${STAMP}" \
+            --body-out email_body.txt
+          {
+            echo "body<<__EOF__"
+            cat email_body.txt
+            echo ""
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
+          if [ -s email_body.txt ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Email this month's papers to check
+        if: ${{ steps.papers.outputs.send == 'true' }}
+        uses: ./.github/actions/notify-email
+        with:
+          subject: "cNPDB: papers to check this month"
+          body: ${{ steps.papers.outputs.body }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+
+      # Best-effort enrichment -- must not block the digest email or the commit.
+      - name: Queue papers whose SI needs a manual pull
+        continue-on-error: true
+        run: python -m DataCuration.si_review scan --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
+
+      - name: Refresh OS/tissue completeness sweep
+        continue-on-error: true
+        run: python -m DataCuration.os_tissue_completeness
+
+      - name: Commit refreshed outputs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add DataCuration/outputs/ DataCuration/si_review/queue.csv
+          if git diff --cached --quiet; then
+            echo "Nothing new this cycle."
+          else
+            git commit -m "lit-mining: refresh new-paper digest + OS/tissue sweep (${STAMP})"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnpdb-curation-outputs
+          path: DataCuration/outputs/
+          if-no-files-found: ignore

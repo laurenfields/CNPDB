@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Ad-hoc tool runs dropped in the repo root. The canonical, CI-regenerated
+# results live in DataCuration/outputs/ and ARE tracked.
+/new_papers*.csv
+/shortlist*.csv
+/os_tissue_gaps*.csv
+/peptide_references*.csv
+DataCuration/peptide_references*.csv

@@ -1,0 +1,60 @@
+Sequence,Species,OS_abbr,Family,Name,PMID
+HLGSLYR,Callinectes_sapidus,Csap,,YRamide,22627023.0
+APGPYAFGL,Carcinus_maenas,Cmae,Allatostatin,Allatostatin A,19523386
+RVINDECPNLIGNRDLYKKVEWICEDCSNIFRKTGMASLCRRNCFFNEDFVWCVHATERSEELRDLEEWVGILGAGRD,Carcinus_maenas,Cmae,Arthropod CHH/MIH/GIH/VIH hormone,Molt-inhibiting hormone,1679945
+DARTPALRLRF,Carcinus_maenas,Cmae,FMRFamide related peptide,FMRFamide-like peptide,19523386
+DTGFAFSPRL,Carcinus_maenas,Cmae,Pyrokinin,Pyrokinin,19523386
+RSVEGVSRMEKLL,Homarus_americanus,HoA,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,20025296.0
+QVFDQACKGVYDRNLFKKLDRVCEDCYNLYRKPFVATTCRENCYSNWVFRQCLDDLLLSDVIDEYVSNVQMV,Homarus_americanus,HoA,Arthropod CHH/MIH/GIH/VIH hormone,Crustacean hyperglycemic hormone A,2169734.0
+RSVEGVSRMEKLLSSSISPSSTPLGFLSQDHSVN,Homarus_americanus,HoA,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide B,1788131.0
+QVFDQACKGVYDRNLFKKLNRVCEDCYNLYRKPFIVTTCRENCYSNRVFRQCLDDLLLSDVIDEYVSNVQMV,Homarus_americanus,HoA,Arthropod CHH/MIH/GIH/VIH hormone,Crustacean hyperglycemic hormone B,
+HDRNFLRF,Homarus_americanus,HoA,FMRFamide related peptide,FMRFamide-related peptide,20025296.0
+LRVAPEEHPVLL,Homarus_americanus,HoA,,,18304551.0
+ADWNKFQGSW,Litopenaeus_vannamei,Lva,Allatostatin,Allatostatin B,19852991.0
+SLFDPSCTGVFDRQLLRRLRRVCDDCFNVFREPNVSTECRSNCYNNEVFRQCMEYLLPPHLHEEHRLAVQMV,Litopenaeus_vannamei,Lva,Arthropod CHH/MIH/GIH/VIH hormone,Crustacean hyperglycemic hormone,8812330.0
+DTFDHSCKGIYDRELFRKLDRVCEDCYNVFREPKVATECKSNCFVNKRFNVCVADLRHDVSRFLKMANSALS,Litopenaeus_vannamei,Lva,Arthropod CHH/MIH/GIH/VIH hormone,Molt-inhibiting hormone-like,
+APERNFLRF,Litopenaeus_vannamei,Lva,FMRFamide related peptide,FMRFamide-related peptide,19852991.0
+GYSNKDFVRF,Litopenaeus_vannamei,Lva,FMRFamide related peptide,FMRFamide-related peptide,19852991.0
+GYSNKNFVRF,Litopenaeus_vannamei,Lva,FMRFamide related peptide,FMRFamide-related peptide,19852991.0
+DEIDRAGMGFA,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+DFDEIDRAGF,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+FDEIDRAGMG,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+FDEIDRAGMGFA,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+NFDEIDRAG,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+NFDEIDRAGF,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+NFDEIDRAGFGFL,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+NFDEIDRAGFGFN,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+NFDEIDRAGMGF,Litopenaeus_vannamei,Lva,Orcokinin,Orcokinin,19852991.0
+ADFAFNPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+DFAFNPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+DFAFSPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+DFSFNPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+GDFAFNPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+GDFAFSPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+YSFLPRL,Litopenaeus_vannamei,Lva,Pyrokinin,pyrokinin,19852991.0
+APAGFLGMR,Litopenaeus_vannamei,Lva,Tachykinin,Tachykinin-related peptide,19852991.0
+APSGFLDMR,Litopenaeus_vannamei,Lva,Tachykinin,Tachykinin-related peptide,19852991.0
+APSGFNGMR,Litopenaeus_vannamei,Lva,Tachykinin,Tachykinin-related peptide,19852991.0
+EAYAGFL,Ocypode_ceratophthalma,Oce,Allatostatin,Allatostatin A,23298572
+EPQYSFGL,Ocypode_ceratophthalma,Oce,Allatostatin,Allatostatin A,23298572
+SDGWSPSGDGSW,Ocypode_ceratophthalma,Oce,Allatostatin,Allatostatin B,23298572
+GPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+LLTSLRGPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+LPSAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+LTSLRGPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+RGPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+SLRGPAESDGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+SLRGPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+SLRGPAESSGESALSE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+TSLRGPAESSGESAHPLE,Ocypode_ceratophthalma,Oce,Arthropod CHH/MIH/GIH/VIH hormone,CHH precursor-related peptide,23298572
+NSELINSILGLPK,Ocypode_ceratophthalma,Oce,Arthropod PDH,Pigment-dispersing hormone,23298572
+NSELINSILGLPKVM,Ocypode_ceratophthalma,Oce,Arthropod PDH,Pigment-dispersing hormone,23298572
+SELINSILGLPKVMNDA,Ocypode_ceratophthalma,Oce,Arthropod PDH,Pigment-dispersing hormone,23298572
+NQPGVNFL,Ocypode_ceratophthalma,Oce,FMRFamide related peptide,FLP-extended-FLRFa,23298572
+SGFYSNRY,Ocypode_ceratophthalma,Oce,NPY,RYamide,23298572
+FDAFTTGFGH,Ocypode_ceratophthalma,Oce,Orcokinin,Orcomyotropin,23298572
+RSVESSGSSSSEPLSFLSQDQSVN,Orconectes_limosus,Olim,Arthropod CHH/MIH/GIH/VIH hormone,CPRPv1,14981133
+RSVESSGSSSSEPLSFLSQDQSVS,Orconectes_limosus,Olim,Arthropod CHH/MIH/GIH/VIH hormone,CPRPv2,14981133
+QVFDQACKGIYDRAIFKKLDRVCEDCYNLYRKPYVATTCRQNCYANSVFRQCLDDLLLIDVLDEYISGVQTV,Orconectes_limosus,Olim,Arthropod CHH/MIH/GIH/VIH hormone,Crustacean hyperglycemic hormone,1800954
+NSELINAILGSPTLFGEV,Orconectes_limosus,Olim,Arthropod PDH,Pigment-dispersing hormone B,14981133
+NSELINAILGSPTLMGEV,Orconectes_limosus,Olim,Arthropod PDH,Pigment-dispersing hormone C,14981133

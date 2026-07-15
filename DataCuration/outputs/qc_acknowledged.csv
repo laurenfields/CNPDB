@@ -1,0 +1,3 @@
+cNPDB ID,category,acknowledged_by,date,reason
+9001,missing_DOI,placeholder,2026-07-15,"EXAMPLE ROW - shows the format; ID 9001 does not exist, so this clears nothing"
+9002,missing_OS,placeholder,2026-07-15,"EXAMPLE ROW - illustrative only; delete when you record real acknowledgements"

@@ -13,7 +13,7 @@ plain-English overview for maintainers and the PI.
 | Email | When it sends | What it means |
 |-------|---------------|---------------|
 | **Papers to check** | Monthly (1st, ~08:00 UTC) | A list of new crustacean-neuropeptide papers worth reviewing for new sequences. A paper drops off automatically once its DOI is in the database. |
-| **Database accuracy check** | When the database is pushed | A quality-control summary (wrong masses, missing species, etc.). **Never blocks the update** — the new database goes live regardless; this is a heads-up. |
+| **Database accuracy check** | When the database is pushed | A summary of **new / not-yet-reviewed** QC issues (wrong masses, missing species, etc.). **Never blocks the update** — the new database goes live regardless; this is a heads-up. Reviewed-and-accepted issues can be silenced (see "Clearing QC alerts"). |
 | **Test-failure alert** | Any change to the repo | Sent only if the automated test suite breaks, with a link to the details — so nobody has to watch the Actions tab. |
 
 ## Which database it monitors
@@ -70,10 +70,32 @@ update / repo change for the other two.
 | Workflow file | Purpose | Trigger |
 |---------------|---------|---------|
 | `.github/workflows/lit-mining.yml` | Monthly paper scan + "papers to check" email | schedule (monthly) + manual |
-| `.github/workflows/db-accuracy.yml` | QC on the database + accuracy email | push to `Assets/20260418_cNPDB.*` + manual |
+| `.github/workflows/db-accuracy.yml` | QC on the database + accuracy email (new issues only) | push to `Assets/20260418_cNPDB.*` + manual |
+| `.github/workflows/acknowledge-qc.yml` | Mark reviewed QC issues as accepted so they stop alerting | manual only |
 | `.github/workflows/tests.yml` | Run tests; email on failure | any push / PR + manual |
 | `.github/workflows/curation-refresh.yml` | (pre-existing) regenerate QC/coverage output files | DB or tool change |
 | `.github/actions/notify-email/` | Shared "send an email" step used by all three | — |
+
+## Clearing (acknowledging) QC alerts
+
+The accuracy email only reports issues that are **new or not yet reviewed**. Once
+a human has looked at an issue and decided it's acceptable, you can "acknowledge"
+it so it stops showing up in every future alert:
+
+- **Acknowledged issues** live in `DataCuration/outputs/qc_acknowledged.csv`
+  (matched by cNPDB ID + issue category). It ships with a couple of clearly-marked
+  **example placeholder rows** that clear nothing — replace or ignore them.
+- **To acknowledge** (after review): Actions tab → **acknowledge-qc** → **Run
+  workflow**. Leave the *categories* box blank to accept **all** currently-flagged
+  issues (use carefully), or list specific ones like `missing_OS,missing_DOI` to
+  accept only those. It records them and commits the file; from then on, only
+  genuinely new issues trigger an email.
+- **Nothing is acknowledged automatically** — it's always a deliberate human step.
+
+> Note: the ~250 issues currently in the database (mostly mass discrepancies and
+> missing species) are intentionally **left unacknowledged** so the team keeps
+> seeing them while deciding open questions (e.g. whether the database should
+> report unmodified mass). Acknowledge them only once those decisions are made.
 
 ## What no automatic check can catch
 

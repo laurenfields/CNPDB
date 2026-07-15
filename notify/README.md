@@ -59,6 +59,16 @@ to that provider's SMTP credentials. The default is Gmail's server.
 Remove the secrets (or empty `recipients.txt`) and emails stop; the workflows
 keep working. To stop a whole notification, delete or disable its workflow.
 
+## Clearing QC alerts you've reviewed
+
+The database-accuracy email reports only **new / not-yet-reviewed** issues. To
+stop being alerted about issues you've reviewed and accepted, run the
+**acknowledge-qc** workflow (Actions → acknowledge-qc → Run workflow). Leave the
+categories box blank to accept all current issues, or list specific categories
+(e.g. `missing_OS,missing_DOI`). Accepted issues are recorded in
+`DataCuration/outputs/qc_acknowledged.csv` and won't trigger future emails.
+Nothing is acknowledged automatically.
+
 ## What each email can and can't tell you
 
 - The **papers-to-check** list depends on the source **DOI** being recorded when

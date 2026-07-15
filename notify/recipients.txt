@@ -4,6 +4,6 @@
 # (monthly papers-to-check, database-accuracy alerts, and test-failure alerts).
 #
 # Add real addresses below, e.g.:
-# jacey@wisc.edu
+
 
 lfields2@uw.edu

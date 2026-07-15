@@ -23,6 +23,14 @@ inputs:
     description: Path to the newline-delimited recipient list.
     required: false
     default: notify/recipients.txt
+  server_address:
+    description: SMTP server host. Default is Gmail; change to switch providers.
+    required: false
+    default: smtp.gmail.com
+  server_port:
+    description: SMTP port (465 = SSL).
+    required: false
+    default: "465"
 
 runs:
   using: composite
@@ -44,8 +52,8 @@ runs:
       if: ${{ inputs.username != '' && steps.rcpt.outputs.list != '' }}
       uses: dawidd6/action-send-mail@v3
       with:
-        server_address: smtp.gmail.com
-        server_port: "465"
+        server_address: ${{ inputs.server_address }}
+        server_port: ${{ inputs.server_port }}
         secure: true
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}

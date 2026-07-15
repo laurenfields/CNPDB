@@ -20,21 +20,39 @@ starting with `#` are ignored. Commit the change — that's all. No code involve
 Nothing sends until this is done. Until then, the workflows still run fine — the
 email step just logs "email skipped" and succeeds.
 
-You need a Gmail account to send *from* (a dedicated project account is cleanest)
-and a Google **app password** (not the normal password):
+### Important: only the *sending* account needs 2FA
 
-1. On the sending Google account, turn on 2-Step Verification.
-2. Go to <https://myaccount.google.com/apppasswords> and create an app password
+Gmail requires 2-Step Verification (2FA) on the account that **sends** the email,
+because an "app password" can only be created once 2FA is on. This does **not**
+affect your shared lab inboxes — they only ever *receive* these emails, and
+recipients need nothing set up at all.
+
+So don't put 2FA on a shared account. Instead, make **one dedicated bot account**
+that exists only to send these notifications, and put 2FA on that:
+
+1. Create a new Gmail just for this, e.g. `cnpdb.notifications@gmail.com`. One
+   person owns it; nobody reads it.
+2. On that bot account, turn on 2-Step Verification.
+3. Go to <https://myaccount.google.com/apppasswords> and create an app password
    named e.g. "cNPDB GitHub". Copy the 16-character code.
-3. In this repository on GitHub: **Settings → Secrets and variables → Actions →
+4. In this repository on GitHub: **Settings → Secrets and variables → Actions →
    New repository secret**, and add two secrets:
-   - `MAIL_USERNAME` — the full Gmail address (e.g. `cnpdb.bot@gmail.com`)
+   - `MAIL_USERNAME` — the bot's full Gmail address
    - `MAIL_PASSWORD` — the 16-character app password
-4. Add at least one address to `recipients.txt` and commit.
+5. Add the real recipient addresses (including your shared lab inboxes) to
+   `recipients.txt` and commit.
 
 That's it. To test immediately without waiting for a schedule, open the
 **Actions** tab, pick **db-accuracy** or **literature-mining**, and click
 **Run workflow** (workflow_dispatch).
+
+### Switching away from Gmail later
+
+If you ever want to send through a different provider (a transactional service
+like Brevo/SendGrid, or a university relay), you don't need Gmail-specific
+secrets — just pass `server_address` (and `server_port`) to the
+`notify-email` action in each workflow, and set `MAIL_USERNAME` / `MAIL_PASSWORD`
+to that provider's SMTP credentials. The default is Gmail's server.
 
 ## Turning it off
 

@@ -48,12 +48,6 @@ jobs:
             --out "DataCuration/outputs/new_papers_${STAMP}.csv" \
             --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
 
-      - name: Queue papers whose SI needs a manual pull
-        run: python -m DataCuration.si_review scan --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
-
-      - name: Refresh OS/tissue completeness sweep
-        run: python -m DataCuration.os_tissue_completeness
-
       - name: Update the papers-to-check reminder + build email
         id: papers
         run: |
@@ -82,6 +76,15 @@ jobs:
           body: ${{ steps.papers.outputs.body }}
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
+
+      # Best-effort enrichment -- must not block the digest email or the commit.
+      - name: Queue papers whose SI needs a manual pull
+        continue-on-error: true
+        run: python -m DataCuration.si_review scan --shortlist "DataCuration/outputs/shortlist_${STAMP}.csv"
+
+      - name: Refresh OS/tissue completeness sweep
+        continue-on-error: true
+        run: python -m DataCuration.os_tissue_completeness
 
       - name: Commit refreshed outputs
         run: |
